@@ -1,7 +1,7 @@
 """Select >=15 legally difficult cases for qualitative error analysis (E5)."""
 import json, os, collections
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-rows = json.load(open(os.path.join(ROOT, "results", "exp5_rows.json")))
+rows = json.load(open(os.path.join(ROOT, "results", "exp5_rows.json"), encoding="utf-8"))
 EMB = "WordLlama cosine (semantic)"
 # hard = error pairs that the generic embedding baseline scores too high (largest over-estimation first)
 err = [r for r in rows if r["gold_type"] not in ("NONE",)]
@@ -15,6 +15,6 @@ for r in err:
 # add 2 faithful paraphrases that baselines under-score
 faith = sorted([r for r in rows if r["gold_type"] == "NONE"], key=lambda r: r["chrF (lexical)"])[:2]
 picked += faith
-json.dump(picked, open(os.path.join(ROOT, "results", "exp5_cases.json"), "w"), ensure_ascii=False, indent=1)
+json.dump(picked, open(os.path.join(ROOT, "results", "exp5_cases.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 for r in picked:
     print(r["id"], r["gold_type"], r["gold_score"], round(r[EMB], 1), round(r["gbr"], 1), round(r["pred_score"], 1), r["pred_type"])

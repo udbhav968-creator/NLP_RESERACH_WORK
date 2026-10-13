@@ -7,10 +7,23 @@ from legal_features import features, FEATURE_NAMES
 # ------------------------------------------------------------------ baselines
 _WL = None
 def wordllama():
+    """Load WordLlama offline if its files are bundled, otherwise download them (needs internet once)."""
     global _WL
     if _WL is None:
+        import shutil, wordllama as _wlpkg
+        from pathlib import Path
         from wordllama import WordLlama
-        _WL = WordLlama.load(disable_download=True)
+        pkg = Path(_wlpkg.__file__).parent
+        src, dst = pkg / "tokenizers" / "l2_supercat_tokenizer_config.json", pkg / "tokenizer" / "l2_supercat_tokenizer_config.json"
+        try:
+            if src.exists() and not dst.exists():
+                dst.parent.mkdir(exist_ok=True); shutil.copy(src, dst)
+        except OSError:
+            pass
+        try:
+            _WL = WordLlama.load(disable_download=True)
+        except Exception:
+            _WL = WordLlama.load()
     return _WL
 
 def chrf(o, s):

@@ -62,5 +62,5 @@ for t, v in sorted(E5["per_type"].items(), key=lambda kv: -kv[1]["n"]):
     lines.append(f"\\textsc{{{t.lower().replace('_', chr(92)+'_')}}} & {v['n']} & {f2(v['p'])} & {f2(v['r'])} & {f2(v['f1'])} \\\\")
 out["tab_explain"] = "\n".join(lines)
 for k, v in out.items():
-    open(os.path.join("/home/claude/paper", k + ".tex"), "w").write(v + "\n")
+    os.makedirs(os.path.join(ROOT, "results", "latex"), exist_ok=True); open(os.path.join(ROOT, "results", "latex", k + ".tex"), "w", encoding="utf-8").write(v + "\n")
 print("ok", list(out))
