@@ -1,0 +1,108 @@
+# Explainable Multilingual Legal Meaning Preservation (EnHi-LMP + ML-JudgeBERT)
+
+CSET 346 – Natural Language Processing · Course project
+Extension of **JUDGEBERT** (Beauchemin et al., EMNLP 2025) from French insurance text to **English + Hindi** and a new legal domain (**tenancy / rent agreements**), with an **explanation module** that names the legal error and gives a short rationale.
+
+For every original–simplified legal sentence pair the system outputs:
+
+| Field | Values |
+|---|---|
+| LMP score | 1–10 (continuous) |
+| Decision | Preserved (≥ 7.5) / Partially Preserved (4.5–7.5) / Not Preserved (< 4.5) |
+| Legal error type | NONE, NEGATION, MODALITY, NUMBER, DATE, OMIT_COND, EXC_REMOVED, SCOPE, ENTITY, HALLUC, MINOR |
+| Explanation | one-sentence rationale, e.g. "Time limit changed: 7 -> 30." |
+
+## Repository layout
+
+```
+data/
+  en_insurance.py, en_tenancy.py      # 40 + 40 English source clauses with faithful + perturbed simplifications
+  hi_insurance.py, hi_tenancy.py      # parallel Hindi (Devanagari) versions, same IDs
+  enhi_lmp.jsonl                      # 320 assembled pairs (built by src/build_dataset.py)
+  sanity_identical.jsonl              # 160 identical pairs (gold 10) – never used for training
+  sanity_unrelated.jsonl              # 160 unrelated pairs (gold 1)  – never used for training
+  frjudge_{train,dev,test}.jsonl      # FrJUDGE official splits (CC BY-NC-SA 4.0) for transfer tests
+src/
+  build_dataset.py                    # assembles the dataset, sanity sets and FrJUDGE splits
+  legal_features.py                   # LegalDiff: EN/HI(/FR) legal-difference features + rule-based explainer
+  lmp_models.py                       # baselines, ML-JudgeBERT cross-encoder, LegalDiff-GBR
+  run_experiments.py                  # Experiments 1-5 (exp1 | exp2 | exp3 | exp5)
+  make_annotation_kit.py              # builds the 2 blinded Excel annotation workbooks
+  merge_annotations.py                # Krippendorff's alpha, adjudication list, human-label dataset
+  finetune_pretrained.py              # ML-JudgeBERT with XLM-R / MuRIL (GPU)
+annotation/
+  EnHi-LMP_annotation_A.xlsx, _B.xlsx # give one to each annotator (rubric on sheet 1)
+  blind_key.csv                       # code -> pair id (do NOT give to annotators)
+results/                              # JSON outputs of every experiment
+ML_JudgeBERT_pretrained_Colab.ipynb   # one-click Colab run of the pretrained encoders
+```
+
+## Quick start
+
+```bash
+pip install -r requirements.txt
+python src/build_dataset.py            # needs the JUDGEBERT repo cloned at /tmp/ext/JUDGEBERT for FrJUDGE
+python src/run_experiments.py exp1     # E1 + E4 (+ predictions used by E5)
+python src/run_experiments.py exp2     # E2 cross-lingual transfer
+python src/run_experiments.py exp3     # E3 cross-domain + FrJUDGE transfer
+python src/run_experiments.py exp5     # E5 explanations / error typing
+python src/finetune_pretrained.py --model xlm-roberta-base   # GPU: pretrained ML-JudgeBERT
+```
+
+## Completing the project (remaining steps)
+
+1. **Human annotation.** Give `annotation/EnHi-LMP_annotation_A.xlsx` and `_B.xlsx` to two annotators (each scores all 320 pairs, 1–10, independently).
+   Then run `python src/merge_annotations.py annotation/EnHi-LMP_annotation_A.xlsx annotation/EnHi-LMP_annotation_B.xlsx`
+   → prints Krippendorff's α, writes `annotation/adjudicate.csv` (pairs differing by ≥ 3 points) and `data/enhi_lmp_human.jsonl`.
+2. **Re-run experiments on human labels:** `LMP_DATA=enhi_lmp_human.jsonl python src/run_experiments.py exp1` (then `exp2`, `exp3`, `exp5`).
+3. **Pretrained encoder:** open `ML_JudgeBERT_pretrained_Colab.ipynb` in Google Colab (T4 GPU) and run all cells (XLM-R base and MuRIL base).
+
+## Publishing to GitHub
+
+```bash
+# create an empty repository named EnHi-LMP-JudgeBERT on github.com first, then:
+cd EnHi-LMP-JudgeBERT
+git remote add origin https://github.com/<your-username>/EnHi-LMP-JudgeBERT.git
+git branch -M main
+git push -u origin main
+```
+
+## Models
+
+* **Baselines (generic similarity):** chrF; WordLlama sentence-embedding cosine; BERTScore-style greedy token-alignment F1.
+  Each similarity is mapped to the 1–10 scale by a linear calibrator fitted on the training fold only.
+* **ML-JudgeBERT:** JUDGEBERT-style cross-encoder `[CLS] original [SEP] simplification [SEP]` → Transformer encoder →
+  `[h_CLS ; u−v ; u⊙v ; |u−v|]` → MLP → `ŷ = 1 + 9·σ(z)`, trained with MSE and JUDGEBERT's data augmentation
+  (identical → 10, unrelated → 1).
+* **ML-JudgeBERT + LegalDiff:** the same model with the 19-dimensional LegalDiff vector fused before the head.
+* **LegalDiff-GBR:** ablation — gradient-boosted regressor on LegalDiff features only.
+
+> Compute note: the development sandbox had no access to pretrained-model hubs, so the encoder reported in
+> `results/` is a 2-layer Transformer **trained from scratch**. The intended backbone is a pretrained multilingual
+> encoder (XLM-R base or MuRIL base) fine-tuned on a GPU; this is the main planned upgrade.
+
+## Data and labels
+
+80 clauses (40 insurance, 40 tenancy) × 2 languages × 2 simplifications (one faithful, one with a single injected legal error) = **320 pairs**.
+Current LMP scores are **rubric-based silver labels** (see rubric below). They must be replaced by double human annotation
+(2 annotators, adjudication of differences ≥ 3, Krippendorff's α) before final reporting.
+
+| LMP | Meaning |
+|---|---|
+| 9–10 | Legal effect identical; only wording changed |
+| 8 | Preserved; trivial non-legal nuance lost |
+| 6–7 | Minor secondary detail omitted (partial) |
+| 4–5 | Secondary condition dropped or scope slightly shifted (partial / not) |
+| 2–3 | Core condition, exception, number, date, party or modality changed |
+| 1 | Rule reversed (contradiction) or unrelated |
+
+## Evaluation
+
+Pearson r, Spearman ρ, RMSE, MAE (regression); macro-F1 of the 3-way decision; F1 for "Not Preserved" detection;
+precision / recall / F1 of the error-type classifier; sanity rates (% identical ≥ 9, % unrelated ≤ 2).
+All cross-validation is **grouped by clause**, so the English and Hindi versions of a clause are always in the same fold.
+
+## Reference
+
+Beauchemin, D., Albert-Rochette, M., Khoury, R., & Déziel, P.-L. (2025). JUDGEBERT: Assessing Legal Meaning Preservation
+Between Sentences. *Proc. EMNLP 2025*, 92–118. Code/data: https://github.com/GRAAL-Research/JUDGEBERT
