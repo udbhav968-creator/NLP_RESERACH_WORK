@@ -1,0 +1,62 @@
+% IEEE conference-style layout (two-column, Times, IEEE heading style) emulated with article,
+% because IEEEtran.cls was not installable in the build environment. Swap \documentclass to
+% \documentclass[conference]{IEEEtran} and remove the "IEEE-style emulation" block to use the official class.
+\documentclass[10pt,twocolumn,a4paper]{article}
+%%%%% IEEE-style emulation
+\usepackage[a4paper,top=19mm,bottom=43mm,left=14.32mm,right=14.32mm,columnsep=4.22mm]{geometry}
+\usepackage{mathptmx}
+\usepackage[no-math]{fontspec}
+\setmainfont{TeX Gyre Termes}
+\newfontfamily\devfont[Script=Devanagari]{Noto Sans Devanagari}
+\usepackage{titlesec}
+\renewcommand\thesection{\Roman{section}}
+\renewcommand\thesubsection{\Alph{subsection}}
+\titleformat{\section}{\centering\normalsize\scshape}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\itshape}{\thesubsection.}{0.5em}{}
+\titlespacing*{\section}{0pt}{8pt}{4pt}
+\titlespacing*{\subsection}{0pt}{6pt}{3pt}
+\usepackage{caption}
+\captionsetup{font=footnotesize,labelsep=period}
+\captionsetup[table]{labelformat=simple,labelsep=newline,textfont=sc,justification=centering}
+\renewcommand\thetable{\Roman{table}}
+\setlength{\parindent}{1em}
+%%%%%
+\usepackage{booktabs,multirow,array,graphicx,xcolor,enumitem,amsmath}
+\usepackage[hidelinks]{hyperref}
+\setlist{nosep,leftmargin=*}
+\newcommand{\hi}[1]{{\devfont #1}}
+\pagestyle{plain}
+
+\begin{document}
+\twocolumn[{%
+\begin{center}
+{\fontsize{22}{26}\selectfont Explainable Multilingual Legal Meaning Preservation\\Using JUDGEBERT\par}
+\vspace{10pt}
+{\normalsize Student Name 1, Student Name 2, Student Name 3\par}
+{\small\itshape School of Computer Science Engineering and Technology, Bennett University, Greater Noida, India\par}
+{\small CSET 346 -- Natural Language Processing \quad Project Instructor: Dr.\ Surabhi Solanki\par}
+\vspace{14pt}
+\end{center}}]
+
+\noindent\textbf{\textit{Abstract}---\input{abstract.tex}}
+
+\smallskip\noindent\textbf{\textit{Index Terms}---legal meaning preservation, text simplification, JUDGEBERT, Hindi NLP, explainable evaluation, cross-lingual transfer.}
+
+\input{sections_static.tex}
+\input{sections_results_full.tex}
+
+\footnotesize
+\begin{thebibliography}{99}
+\bibitem{judgebert} D. Beauchemin, M. Albert-Rochette, R. Khoury, and P.-L. Déziel, ``JUDGEBERT: Assessing legal meaning preservation between sentences,'' in \emph{Proc. EMNLP}, 2025, pp. 92--118.
+\bibitem{bleu} K. Papineni, S. Roukos, T. Ward, and W.-J. Zhu, ``BLEU: A method for automatic evaluation of machine translation,'' in \emph{Proc. ACL}, 2002, pp. 311--318.
+\bibitem{chrf} M. Popović, ``chrF: Character n-gram F-score for automatic MT evaluation,'' in \emph{Proc. WMT}, 2015, pp. 392--395.
+\bibitem{sari} W. Xu, C. Napoles, E. Pavlick, Q. Chen, and C. Callison-Burch, ``Optimizing statistical machine translation for text simplification,'' \emph{TACL}, vol. 4, pp. 401--415, 2016.
+\bibitem{sbert} N. Reimers and I. Gurevych, ``Sentence-BERT: Sentence embeddings using Siamese BERT-networks,'' in \emph{Proc. EMNLP-IJCNLP}, 2019, pp. 3982--3992.
+\bibitem{bertscore} T. Zhang, V. Kishore, F. Wu, K. Q. Weinberger, and Y. Artzi, ``BERTScore: Evaluating text generation with BERT,'' in \emph{Proc. ICLR}, 2020.
+\bibitem{meaningbert} D. Beauchemin, H. Saggion, and R. Khoury, ``MeaningBERT: Assessing meaning preservation between sentences,'' \emph{Frontiers in Artificial Intelligence}, vol. 6, 2023.
+\bibitem{geval} Y. Liu, D. Iter, Y. Xu, S. Wang, R. Xu, and C. Zhu, ``G-Eval: NLG evaluation using GPT-4 with better human alignment,'' in \emph{Proc. EMNLP}, 2023, pp. 2511--2522.
+\bibitem{xlmr} A. Conneau \emph{et al.}, ``Unsupervised cross-lingual representation learning at scale,'' in \emph{Proc. ACL}, 2020, pp. 8440--8451.
+\bibitem{muril} S. Khanuja \emph{et al.}, ``MuRIL: Multilingual representations for Indian languages,'' arXiv:2103.10730, 2021.
+\bibitem{kripp} K. Krippendorff, \emph{Content Analysis: An Introduction to Its Methodology}, 4th ed. Thousand Oaks, CA: SAGE, 2018.
+\end{thebibliography}
+\end{document}

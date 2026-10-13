@@ -1,0 +1,58 @@
+\section{Introduction}
+Plain-language rewriting of contracts, insurance policies and tenancy agreements is increasingly automated with large language models. A rewrite is useful only if it keeps the \emph{legal} meaning of the source: who must do what, under which conditions, with which exceptions, by when and for how much. Small surface edits can silently invert that meaning. Removing the single word ``not'' turns an exclusion into coverage, replacing ``must'' by ``may'' turns a duty into an option, and changing ``7 days'' into ``30 days'' moves a deadline. Generic similarity measures are almost blind to such edits because the two sentences still share most of their words and most of their distributional meaning.
+
+Beauchemin et al.~\cite{judgebert} formalised this problem as \emph{Legal Meaning Preservation} (LMP), released FrJUDGE, a set of 297 French insurance sentence pairs scored from 1 to 10 by five annotators, and trained JUDGEBERT, a BERT-family regressor that predicts the human LMP score. The paper names its own limitations: one language, one legal domain, a small dataset, sentence-level judgements without context and no out-of-domain evaluation.
+
+This project extends JUDGEBERT along four of those axes and adds explainability. Our contributions are:
+\begin{enumerate}
+\item \textbf{EnHi-LMP}, a parallel English--Hindi dataset of 320 original--simplified pairs over two legal domains (insurance and tenancy), each pair tagged with one of ten legal error types, plus 320 held-out identical/unrelated sanity pairs.
+\item \textbf{LegalDiff}, a bilingual set of 19 interpretable legal-difference features (modality, negation, numbers, durations, parties, conditions, exceptions, scope) and a rule-based explainer that returns an error type and a one-sentence rationale.
+\item \textbf{ML-JudgeBERT}, a JUDGEBERT-style cross-encoder regressor, optionally fused with LegalDiff, trained with JUDGEBERT's identical/unrelated data augmentation.
+\item A five-experiment evaluation: generic similarity vs.\ LMP models (E1), English vs.\ Hindi and cross-lingual transfer (E2), cross-domain and FrJUDGE transfer (E3), sanity checks (E4) and error analysis with explanation scoring (E5).
+\end{enumerate}
+
+\section{Related Work}
+\textbf{Surface-overlap metrics.} BLEU~\cite{bleu} and chrF~\cite{chrf} measure n-gram and character n-gram overlap with a reference; SARI~\cite{sari} scores simplification operations against references. All reward copying and are insensitive to the legal effect of a dropped negation or condition.
+
+\textbf{Embedding-based similarity.} Sentence-BERT~\cite{sbert} cosine and BERTScore~\cite{bertscore} compare contextual representations. They capture paraphrase well but treat ``covers'' and ``does not cover'' as near neighbours (Section~\ref{sec:motivation}).
+
+\textbf{Learned meaning preservation.} MeaningBERT~\cite{meaningbert} learns to predict human meaning-preservation judgements for general-domain simplification, and LLM-as-judge methods such as G-Eval~\cite{geval} prompt a large model for a score and rationale. Neither is calibrated to legal effect, and LLM judges are costly and hard to reproduce.
+
+\textbf{Legal meaning preservation.} JUDGEBERT~\cite{judgebert} is, to our knowledge, the only metric trained on human judgements of legal meaning. It is limited to French property-damage insurance and returns a score without explanation. Multilingual encoders such as XLM-R~\cite{xlmr} and MuRIL~\cite{muril} make an Indian-language extension possible.
+
+\section{Problem Formulation}\label{sec:motivation}
+Given an original legal sentence $o$ and a simplification $s$ in language $\ell\in\{\text{en},\text{hi}\}$ from domain $d\in\{\text{insurance},\text{tenancy}\}$, we learn
+\begin{equation}
+f(o,s;\theta)\rightarrow \hat{y}\in[1,10],
+\end{equation}
+approximating the gold LMP score $y$. A decision rule maps the score to three classes,
+\begin{equation}
+\delta(\hat{y})=\begin{cases}\text{Preserved} & \hat{y}\ge 7.5\\ \text{Partially preserved} & 4.5\le\hat{y}<7.5\\ \text{Not preserved} & \hat{y}<4.5,\end{cases}
+\end{equation}
+and an explainer $g(o,s,\hat{y})$ returns an error type $e\in\mathcal{E}$ ($|\mathcal{E}|=11$ including \textsc{none}) and a rationale. Models are judged by Pearson $r$ and RMSE against $y$.
+
+\textbf{Motivating example.} For the insurance clause ``The policy does not cover damage \ldots\ caused by wear and tear'', a faithful rewrite and a rewrite that drops ``not'' obtain sentence-embedding cosines of 0.85 and 0.84, although their LMP scores are 10 and 1. The same pair in Hindi obtains 0.92 for both.
+
+\section{The EnHi-LMP Dataset}
+\textbf{Source clauses.} We wrote 80 source clauses modelled on standard Indian motor/health/property insurance wordings (40) and residential rent agreements (40), and translated each into Hindi, giving parallel EN--HI clause twins.
+
+\textbf{Simplifications.} For every clause and language we wrote one faithful plain-language simplification and one simplification containing exactly one legally significant change from a ten-type taxonomy: \textsc{negation}, \textsc{modality} (obligation$\leftrightarrow$permission), \textsc{number}, \textsc{date}/time limit, omitted condition (\textsc{omit\_cond}), removed exception (\textsc{exc\_removed}), \textsc{scope} change, party/\textsc{entity} swap, hallucinated content (\textsc{halluc}) and \textsc{minor} non-essential omission. This yields $80\times2\times2=320$ pairs (Table~\ref{tab:data}).
+
+\textbf{Labels.} Each pair carries an LMP score on JUDGEBERT's 1--10 scale assigned with a written rubric (9--10 identical legal effect; 6--7 minor detail lost; 4--5 secondary condition or scope shifted; 2--3 core condition, exception, figure, party or modality changed; 1 reversal). \emph{In this version the scores are rubric-based silver labels}; the protocol for the final version is independent double annotation, adjudication of differences of three or more points and reporting of Krippendorff's $\alpha$~\cite{kripp}.
+
+\textbf{Sanity sets.} Following JUDGEBERT, each original is paired with itself (gold 10) and with an unrelated simplification from the other domain in the same language (gold 1). These 320 pairs are never used for training.
+
+\section{Methods}
+\subsection{Generic similarity baselines}
+We use chrF~\cite{chrf}, sentence-embedding cosine and a BERTScore-style~\cite{bertscore} greedy token-alignment F1. Embeddings come from WordLlama, a static distillation of Llama-2 token embeddings. Each similarity is mapped to the 1--10 scale by a linear calibrator fitted on the training fold only, so RMSE is comparable across systems.
+
+\subsection{LegalDiff features and explainer}
+LegalDiff compares $o$ and $s$ with bilingual lexicons and number/duration parsers (Devanagari digits and Indian number formats such as ``15,00,000'' and ``15 lakh'' are normalised). Its 19 features are: missing/added numbers, duration mismatches, negation difference, obligation and permission marker differences, a modal-flip flag, lost/added condition and exception markers, quantifier difference, party-role Jaccard distance and subject change, length ratio, lexical coverage, novelty and time-word change. A priority-ordered rule set turns the features and the predicted score into an error type and a templated rationale (e.g. ``Time limit changed: 7 $\rightarrow$ 30'').
+
+\subsection{ML-JudgeBERT}
+Following JUDGEBERT, the pair is cross-encoded as \texttt{[CLS]} $o$ \texttt{[SEP]} $s$ \texttt{[SEP]} with segment embeddings. A Transformer encoder produces token states; we pool $h_{\text{CLS}}$ and the mean states $u$, $v$ of the two segments into $[h_{\text{CLS}};u-v;u\odot v;|u-v|]$, optionally concatenate the standardised LegalDiff vector, and predict $\hat{y}=1+9\,\sigma(\mathrm{MLP}(\cdot))$. Training minimises MSE with AdamW and a one-cycle schedule, using JUDGEBERT's augmentation: for every training original we add the identical pair (10) and one unrelated pair (1).
+
+\textbf{Compute constraint.} The development environment could not download pretrained checkpoints, so the encoder used here is a 2-layer, 128-dimensional Transformer with a 3k-token BPE vocabulary shared by English and Hindi, trained from scratch on CPU. A pretrained multilingual backbone (XLM-R or MuRIL) is the intended configuration and is discussed in Section~\ref{sec:limits}.
+
+\subsection{LegalDiff-GBR}
+As an ablation without any text encoder we fit a gradient-boosted regressor (200 trees, depth 3) on the LegalDiff features, with the same augmentation.

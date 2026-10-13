@@ -12,6 +12,17 @@ For every original–simplified legal sentence pair the system outputs:
 | Legal error type | NONE, NEGATION, MODALITY, NUMBER, DATE, OMIT_COND, EXC_REMOVED, SCOPE, ENTITY, HALLUC, MINOR |
 | Explanation | one-sentence rationale, e.g. "Time limit changed: 7 -> 30." |
 
+## Deliverables (in `deliverables/`)
+
+| File | What it is |
+|---|---|
+| `LMP_Milestone1.pptx` | 10-slide Milestone 1 presentation with speaker notes and E1–E5 results |
+| `LMP_IEEE_Paper.pdf` / `.docx` | Research paper (IEEE two-column style), PDF and editable Word |
+| `Research_Gaps_and_Enhancements.pdf` | The 9 research gaps in JUDGEBERT and how this project addresses each |
+| `build_slides.js` | Script that regenerates the slides from `results/` (pptxgenjs) |
+
+Paper sources (LaTeX, figure, Word builder) are in `paper/`. Windows users can train everything with `train_enhi_lmp.ps1` (see the script header).
+
 ## Repository layout
 
 ```
