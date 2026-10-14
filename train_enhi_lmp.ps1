@@ -92,6 +92,9 @@ function Find-Python {
 # ------------------------------------------------------------------ 1. project folder
 Write-Step "1/6  Locating the project"
 $Repo = Join-Path $WorkDir "EnHi-LMP-JudgeBERT"
+if (-not (Test-Path (Join-Path $Repo "src\run_experiments.py")) -and (Test-Path (Join-Path $WorkDir "NLP_RESERACH_WORK\src\run_experiments.py"))) {
+    $Repo = Join-Path $WorkDir "NLP_RESERACH_WORK"         # folder name used by the GitHub clone
+}
 if (-not (Test-Path (Join-Path $Repo "src\run_experiments.py"))) {
     if (Test-Path (Join-Path $WorkDir "src\run_experiments.py")) {
         $Repo = $WorkDir                                     # script placed inside the project folder

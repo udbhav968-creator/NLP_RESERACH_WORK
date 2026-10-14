@@ -20,9 +20,11 @@ EPOCHS = int(os.environ.get("EPOCHS", "40"))
 
 def dec(s):
     s = np.asarray(s); return np.where(s >= 7.5, 2, np.where(s >= 4.5, 1, 0))
+def corr(f, p, g):
+    return 0.0 if np.std(p) < 1e-9 or np.std(g) < 1e-9 else float(f(p, g)[0])   # constant predictions -> 0, not NaN
 def metrics(pred, gold):
     pred, gold = np.asarray(pred, float), np.asarray(gold, float)
-    return dict(pearson=float(pearsonr(pred, gold)[0]), spearman=float(spearmanr(pred, gold)[0]),
+    return dict(pearson=corr(pearsonr, pred, gold), spearman=corr(spearmanr, pred, gold),
                 rmse=float(np.sqrt(np.mean((pred - gold) ** 2))), mae=float(np.mean(np.abs(pred - gold))),
                 f1_decision=float(f1_score(dec(gold), dec(pred), average="macro")),
                 f1_notpreserved=float(f1_score(gold < 4.5, pred < 4.5)), n=int(len(gold)))

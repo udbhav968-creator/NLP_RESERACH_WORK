@@ -68,15 +68,29 @@ python src/finetune_pretrained.py --model xlm-roberta-base   # GPU: pretrained M
 2. **Re-run experiments on human labels:** `LMP_DATA=enhi_lmp_human.jsonl python src/run_experiments.py exp1` (then `exp2`, `exp3`, `exp5`).
 3. **Pretrained encoder:** open `ML_JudgeBERT_pretrained_Colab.ipynb` in Google Colab (T4 GPU) and run all cells (XLM-R base and MuRIL base).
 
-## Publishing to GitHub
+## Getting the code
 
 ```bash
-# create an empty repository named EnHi-LMP-JudgeBERT on github.com first, then:
-cd EnHi-LMP-JudgeBERT
-git remote add origin https://github.com/<your-username>/EnHi-LMP-JudgeBERT.git
-git branch -M main
-git push -u origin main
+git clone https://github.com/udbhav968-creator/NLP_RESERACH_WORK.git
+cd NLP_RESERACH_WORK
+python src/demo.py                                   # score three example clauses
+python src/demo.py "original sentence" "simplified sentence"
 ```
+
+## Changelog — v2 (code review fixes)
+
+| Area | Problem in v1 | Fix in v2 |
+|---|---|---|
+| Hindi tokenisation | Danda (। ॥) stayed attached to the last word, so sentence-final नहीं / करेगा / होगा were missed | Danda treated as punctuation |
+| Numbers in compounds | "six-month", "three-month" were single tokens, so number changes were missed | Hyphenated compounds split (number words such as "twenty-four" kept) |
+| Possessives | "tenant's", "landlord's" did not match party roles | Possessive 's removed; French elisions (l', n', lorsqu') split |
+| Time units | माह vs महीने, वर्ष vs साल, day vs days counted as different units | One canonical unit per word (day/week/month/year/hour/date) |
+| Modality | "cannot" / "नहीं … सकता" (prohibition) counted as permission | Negated permission counted as obligation (same force as "shall not") |
+| Lexicons | "one"/"एक" asymmetric; no crore/thousand; no "without"/"none"; Hindi infinitives (करना, देना) counted as obligation | Fixed; all lexicons NFC-normalised |
+| Pretrained fusion | Late-fusion weight chosen on training predictions (in-sample) | 20 % of training clauses held out to pick the best epoch and the fusion weight |
+| Metrics | Constant predictions gave NaN correlations | Guarded (reported as 0) |
+| Human labels | Unannotated pairs silently kept silver scores | `enhi_lmp_human.jsonl` contains human-scored pairs only, with `label_source` |
+| Colab | Placeholder clone URL and folder name | Points to this repository |
 
 ## Models
 

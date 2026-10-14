@@ -30,8 +30,9 @@ if __name__ == "__main__":
         a, b = A.get(code), B.get(code); vals = [v for v in (a, b) if v is not None]
         units.append(vals)
         if a is not None and b is not None and abs(a - b) >= 3: adj.append((code, pid, a, b))
-        r = dict(rows[pid]); r["silver_score"] = r["score"]
+        r = dict(rows[pid]); r["silver_score"] = r["score"]; r["label_source"] = "silver"
         if vals:
+            r["label_source"] = "human"
             r["score"] = float(np.mean(vals)); r["annotations"] = vals
             r["decision"] = "Preserved" if r["score"] >= 7.5 else ("Partially Preserved" if r["score"] >= 4.5 else "Not Preserved")
         out.append(r)
@@ -40,12 +41,14 @@ if __name__ == "__main__":
     rep = dict(krippendorff_alpha_interval=alpha, n_pairs_both=len(both),
                exact_agreement=float(np.mean([a == b for a, b in both])) if both else None,
                within_1=float(np.mean([abs(a - b) <= 1 for a, b in both])) if both else None,
-               n_to_adjudicate=len(adj))
+               n_to_adjudicate=len(adj), n_pairs_human=sum(r["label_source"] == "human" for r in out))
     sil = [r["silver_score"] for r in out if "annotations" in r]; hum = [r["score"] for r in out if "annotations" in r]
     if len(hum) > 2: rep["pearson_silver_vs_human"] = float(np.corrcoef(sil, hum)[0, 1])
     json.dump(rep, open(os.path.join(ROOT, "annotation", "agreement.json"), "w"), indent=1)
     with open(os.path.join(ROOT, "annotation", "adjudicate.csv"), "w", newline="", encoding="utf-8") as fh:
         csv.writer(fh).writerows([("code", "pair_id", "annotator_A", "annotator_B")] + adj)
     with open(os.path.join(ROOT, "data", "enhi_lmp_human.jsonl"), "w", encoding="utf-8") as fh:
-        for r in out: fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+        # only pairs with at least one human score are written, so experiments on this file use human labels only
+        for r in out:
+            if r["label_source"] == "human": fh.write(json.dumps(r, ensure_ascii=False) + "\n")
     print(json.dumps(rep, indent=1))
