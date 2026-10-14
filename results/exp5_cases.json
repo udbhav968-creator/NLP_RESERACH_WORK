@@ -5,7 +5,7 @@
   "domain": "insurance",
   "gold_score": 1,
   "gold_type": "MODALITY",
-  "pred_score": 4.221180682270631,
+  "pred_score": 3.753752645747083,
   "pred_type": "SCOPE",
   "explanation": "Legal scope of the rule differs from the original.",
   "original": "बीमित वाहन का उपयोग किराये या पारिश्रमिक के लिए नहीं किया जाएगा, जब तक कि पॉलिसी विशेष रूप से वाणिज्यिक उपयोग को कवर न करती हो।",
@@ -13,9 +13,9 @@
   "chrF (lexical)": 6.192072472493189,
   "WordLlama cosine (semantic)": 7.0831490209073165,
   "Token-alignment F1 (BERTScore-style)": 7.1723743261747375,
-  "gbr": 4.221180682270631,
-  "text_only": 8.29348357518514,
-  "hybrid": 9.21884028116862
+  "gbr": 3.753752645747083,
+  "text_only": 7.664979298909505,
+  "hybrid": 9.872599283854166
  },
  {
   "id": "INS27-hi-P",
@@ -23,7 +23,7 @@
   "domain": "insurance",
   "gold_score": 1,
   "gold_type": "ENTITY",
-  "pred_score": 5.221878983515509,
+  "pred_score": 7.064723636193913,
   "pred_type": "ENTITY",
   "explanation": "Rights/duties assigned to a different party (subject changed).",
   "original": "पॉलिसीधारक की मृत्यु की स्थिति में नामांकित व्यक्ति पॉलिसी लाभ प्राप्त करने का हकदार होगा।",
@@ -31,9 +31,9 @@
   "chrF (lexical)": 7.645896897702546,
   "WordLlama cosine (semantic)": 6.994219601866217,
   "Token-alignment F1 (BERTScore-style)": 7.028852057078598,
-  "gbr": 5.221878983515509,
-  "text_only": 6.089597702026367,
-  "hybrid": 6.159218152364095
+  "gbr": 7.064723636193913,
+  "text_only": 5.341114203135173,
+  "hybrid": 7.353219827016194
  },
  {
   "id": "TEN16-hi-P",
@@ -41,7 +41,7 @@
   "domain": "tenancy",
   "gold_score": 1,
   "gold_type": "NEGATION",
-  "pred_score": 4.47726261341177,
+  "pred_score": 6.8277295587997235,
   "pred_type": "NEGATION",
   "explanation": "Polarity changed: negation removed in the simplification, reversing the rule.",
   "original": "मकान मालिक परिसर की पानी और बिजली सहित किसी भी आवश्यक आपूर्ति या सेवा को नहीं काटेगा या नहीं रोकेगा।",
@@ -49,9 +49,9 @@
   "chrF (lexical)": 7.152160463494845,
   "WordLlama cosine (semantic)": 6.955803474250226,
   "Token-alignment F1 (BERTScore-style)": 6.983147159609528,
-  "gbr": 4.47726261341177,
-  "text_only": 9.416276931762695,
-  "hybrid": 9.25701936086019
+  "gbr": 6.8277295587997235,
+  "text_only": 9.366954485575357,
+  "hybrid": 9.562710444132486
  },
  {
   "id": "TEN08-hi-P",
@@ -59,7 +59,7 @@
   "domain": "tenancy",
   "gold_score": 1,
   "gold_type": "OMIT_COND",
-  "pred_score": 2.6874307481151525,
+  "pred_score": 1.964224315051365,
   "pred_type": "NEGATION",
   "explanation": "Polarity changed: negation added in the simplification, reversing the rule.",
   "original": "मकान मालिक किरायेदार को कम से कम चौबीस घंटे का नोटिस देने के बाद सुबह 8 बजे से रात 8 बजे के बीच निरीक्षण के लिए परिसर में प्रवेश कर सकता है।",
@@ -67,9 +67,9 @@
   "chrF (lexical)": 4.20641636473518,
   "WordLlama cosine (semantic)": 6.916327916958432,
   "Token-alignment F1 (BERTScore-style)": 6.851118841262862,
-  "gbr": 2.6874307481151525,
-  "text_only": 8.791590531667074,
-  "hybrid": 1.3278419574101765
+  "gbr": 1.964224315051365,
+  "text_only": 8.787420749664307,
+  "hybrid": 1.1078643004099529
  },
  {
   "id": "TEN28-hi-P",
@@ -77,17 +77,17 @@
   "domain": "tenancy",
   "gold_score": 1,
   "gold_type": "HALLUC",
-  "pred_score": 5.964187498264709,
-  "pred_type": "ENTITY",
-  "explanation": "Rights/duties assigned to a different party (LANDLORD).",
+  "pred_score": 3.9610263455245174,
+  "pred_type": "NEGATION",
+  "explanation": "Polarity changed: negation removed in the simplification, reversing the rule.",
   "original": "किरायेदारी की अवधि के दौरान किरायेदार को विधि द्वारा निर्धारित प्रक्रिया के अनुसार ही बेदखल किया जाएगा, अन्यथा नहीं।",
   "simplification": "किरायेदारी के दौरान मकान मालिक सात दिन का नोटिस देकर किरायेदार को बेदखल कर सकता है।",
   "chrF (lexical)": 4.989597224434905,
   "WordLlama cosine (semantic)": 6.815959995561547,
   "Token-alignment F1 (BERTScore-style)": 6.683610884222636,
-  "gbr": 5.964187498264709,
-  "text_only": 4.31282623608907,
-  "hybrid": 1.3636585871378581
+  "gbr": 3.9610263455245174,
+  "text_only": 4.312618613243103,
+  "hybrid": 1.1773178974787395
  },
  {
   "id": "INS27-en-P",
@@ -95,7 +95,7 @@
   "domain": "insurance",
   "gold_score": 1,
   "gold_type": "ENTITY",
-  "pred_score": 7.890926287989217,
+  "pred_score": 8.027826709371356,
   "pred_type": "NONE",
   "explanation": "Legal meaning appears preserved; no legally salient difference detected.",
   "original": "The nominee shall be entitled to receive the policy benefits in the event of the death of the policyholder.",
@@ -103,9 +103,9 @@
   "chrF (lexical)": 8.296851998621687,
   "WordLlama cosine (semantic)": 6.485227276308479,
   "Token-alignment F1 (BERTScore-style)": 6.237641227726353,
-  "gbr": 7.890926287989217,
-  "text_only": 7.453637440999349,
-  "hybrid": 9.906590779622396
+  "gbr": 8.027826709371356,
+  "text_only": 7.5570220947265625,
+  "hybrid": 9.955745061238607
  },
  {
   "id": "INS06-en-P",
@@ -113,7 +113,7 @@
   "domain": "insurance",
   "gold_score": 1,
   "gold_type": "NEGATION",
-  "pred_score": 8.871679579509692,
+  "pred_score": 8.722162330583522,
   "pred_type": "NONE",
   "explanation": "Legal meaning appears preserved; no legally salient difference detected.",
   "original": "The policy does not cover damage to the insured property caused by wear and tear, gradual deterioration, or inherent defect.",
@@ -121,9 +121,9 @@
   "chrF (lexical)": 8.808822312142626,
   "WordLlama cosine (semantic)": 6.149193868086577,
   "Token-alignment F1 (BERTScore-style)": 6.12046040922524,
-  "gbr": 8.871679579509692,
-  "text_only": 9.714725176493326,
-  "hybrid": 9.907954216003418
+  "gbr": 8.722162330583522,
+  "text_only": 9.768890062967936,
+  "hybrid": 9.885817527770996
  },
  {
   "id": "INS30-hi-P",
@@ -131,7 +131,7 @@
   "domain": "insurance",
   "gold_score": 2,
   "gold_type": "DATE",
-  "pred_score": 5.126235207545261,
+  "pred_score": 5.412838880249557,
   "pred_type": "DATE",
   "explanation": "Time limit (91) removed or altered.",
   "original": "नवजात शिशु का कवरेज जन्म के इक्यानवेवें दिन से आरंभ होगा, बशर्ते नवीनीकरण के समय प्रस्ताव में शिशु की घोषणा की गई हो।",
@@ -139,9 +139,9 @@
   "chrF (lexical)": 5.628729237693377,
   "WordLlama cosine (semantic)": 7.0833120736410695,
   "Token-alignment F1 (BERTScore-style)": 6.92153719057797,
-  "gbr": 5.126235207545261,
-  "text_only": 8.617734909057617,
-  "hybrid": 8.133967717488607
+  "gbr": 5.412838880249557,
+  "text_only": 8.527149359385172,
+  "hybrid": 6.2271803220113116
  },
  {
   "id": "TEN25-hi-P",
@@ -149,7 +149,7 @@
   "domain": "tenancy",
   "gold_score": 2,
   "gold_type": "EXC_REMOVED",
-  "pred_score": 5.424147122958864,
+  "pred_score": 6.273066346364594,
   "pred_type": "EXC_REMOVED",
   "explanation": "An exception/carve-out in the original is missing, widening the rule.",
   "original": "सामान्य टूट-फूट को छोड़कर, किरायेदार अपनी लापरवाही से परिसर को हुई किसी भी क्षति के लिए उत्तरदायी होगा।",
@@ -157,9 +157,9 @@
   "chrF (lexical)": 5.6896769841975505,
   "WordLlama cosine (semantic)": 7.048323644261132,
   "Token-alignment F1 (BERTScore-style)": 6.956140769863149,
-  "gbr": 5.424147122958864,
-  "text_only": 5.1794402201970415,
-  "hybrid": 5.3397477467854815
+  "gbr": 6.273066346364594,
+  "text_only": 4.994930187861125,
+  "hybrid": 6.295232613881429
  },
  {
   "id": "INS13-hi-P",
@@ -167,7 +167,7 @@
   "domain": "insurance",
   "gold_score": 2,
   "gold_type": "SCOPE",
-  "pred_score": 5.8760091291433945,
+  "pred_score": 6.487766907999454,
   "pred_type": "MINOR",
   "explanation": "Minor detail omitted; core legal effect largely retained.",
   "original": "जहाँ बीमित व्यक्ति के पास एक ही जोखिम को कवर करने वाली एक से अधिक पॉलिसियाँ हों, वहाँ बीमाकर्ता केवल हानि के अपने अनुपातिक हिस्से के लिए उत्तरदायी होगा।",
@@ -175,9 +175,9 @@
   "chrF (lexical)": 5.42212367627552,
   "WordLlama cosine (semantic)": 6.98917251168317,
   "Token-alignment F1 (BERTScore-style)": 7.0276008197817825,
-  "gbr": 5.8760091291433945,
-  "text_only": 6.335204521814982,
-  "hybrid": 9.074726899464926
+  "gbr": 6.487766907999454,
+  "text_only": 5.853334347407023,
+  "hybrid": 9.133618195851644
  },
  {
   "id": "TEN02-hi-P",
@@ -185,7 +185,7 @@
   "domain": "tenancy",
   "gold_score": 2,
   "gold_type": "NUMBER",
-  "pred_score": 2.2872311004821846,
+  "pred_score": 2.0722550087362444,
   "pred_type": "DATE",
   "explanation": "Time limit changed: 2 -> 6.",
   "original": "प्रतिभूति जमा राशि दो माह के किराये से अधिक नहीं होगी और खाली कब्ज़ा लेते समय किसी भी वैध बकाया को घटाकर वापस की जाएगी।",
@@ -193,9 +193,9 @@
   "chrF (lexical)": 4.860918984582743,
   "WordLlama cosine (semantic)": 6.9086873541105085,
   "Token-alignment F1 (BERTScore-style)": 6.958506698045422,
-  "gbr": 2.2872311004821846,
-  "text_only": 7.19490385055542,
-  "hybrid": 1.0841600894927979
+  "gbr": 2.0722550087362444,
+  "text_only": 7.039881626764934,
+  "hybrid": 1.0472740332285564
  },
  {
   "id": "TEN30-en-P",
@@ -203,17 +203,17 @@
   "domain": "tenancy",
   "gold_score": 2,
   "gold_type": "DATE",
-  "pred_score": 5.464476770711429,
+  "pred_score": 1.4629298535020945,
   "pred_type": "DATE",
-  "explanation": "Time limit (6) removed or altered.",
+  "explanation": "Time limit changed: 6 -> 3.",
   "original": "The Tenant may terminate the agreement before the lock-in period of six months only on payment of the rent for the remaining lock-in period.",
   "simplification": "The tenant can end the agreement during the three-month lock-in period only if the tenant pays rent for the rest of the lock-in period.",
   "chrF (lexical)": 7.237141188385698,
   "WordLlama cosine (semantic)": 6.565922144928178,
   "Token-alignment F1 (BERTScore-style)": 6.345069942390986,
-  "gbr": 5.464476770711429,
-  "text_only": 8.556765079498291,
-  "hybrid": 9.952186902364096
+  "gbr": 1.4629298535020945,
+  "text_only": 8.413846810658773,
+  "hybrid": 9.431272506713867
  },
  {
   "id": "INS14-en-P",
@@ -221,7 +221,7 @@
   "domain": "insurance",
   "gold_score": 2,
   "gold_type": "NUMBER",
-  "pred_score": 5.333080718127092,
+  "pred_score": 5.630778215097426,
   "pred_type": "NUMBER",
   "explanation": "Amount/quantity changed: 5000 -> 50000.",
   "original": "The deductible of Rs. 5,000 shall apply to each and every claim under Section I of this policy.",
@@ -229,9 +229,9 @@
   "chrF (lexical)": 8.444618249763108,
   "WordLlama cosine (semantic)": 6.551549563680437,
   "Token-alignment F1 (BERTScore-style)": 6.679643154283504,
-  "gbr": 5.333080718127092,
-  "text_only": 6.733437538146973,
-  "hybrid": 9.423086802164713
+  "gbr": 5.630778215097426,
+  "text_only": 7.652199904123942,
+  "hybrid": 9.51911481221517
  },
  {
   "id": "TEN08-en-P",
@@ -239,17 +239,17 @@
   "domain": "tenancy",
   "gold_score": 1,
   "gold_type": "OMIT_COND",
-  "pred_score": 3.5423304742606305,
-  "pred_type": "DATE",
-  "explanation": "Time limit (8, 24) removed or altered.",
+  "pred_score": 2.1810885346529783,
+  "pred_type": "NEGATION",
+  "explanation": "Polarity changed: negation added in the simplification, reversing the rule.",
   "original": "The Landlord may enter the premises for inspection after giving at least twenty-four hours' notice to the Tenant, between 8 a.m. and 8 p.m.",
   "simplification": "The landlord can enter to inspect the premises at any time without notice.",
   "chrF (lexical)": 4.584944463000246,
   "WordLlama cosine (semantic)": 5.395391626420183,
   "Token-alignment F1 (BERTScore-style)": 5.288887607385577,
-  "gbr": 3.5423304742606305,
-  "text_only": 5.574351708094279,
-  "hybrid": 1.1222158273061116
+  "gbr": 2.1810885346529783,
+  "text_only": 4.800053199132283,
+  "hybrid": 1.0270684162775676
  },
  {
   "id": "TEN28-en-P",
@@ -257,7 +257,7 @@
   "domain": "tenancy",
   "gold_score": 1,
   "gold_type": "HALLUC",
-  "pred_score": 3.6180987282958808,
+  "pred_score": 3.7597078766218566,
   "pred_type": "MODALITY",
   "explanation": "Deontic force changed (obligation vs. permission/discretion).",
   "original": "The Tenant shall not be evicted during the subsistence of the tenancy except in accordance with the procedure prescribed by law.",
@@ -265,9 +265,9 @@
   "chrF (lexical)": 4.964384128900749,
   "WordLlama cosine (semantic)": 5.353804850842116,
   "Token-alignment F1 (BERTScore-style)": 5.169113479189283,
-  "gbr": 3.6180987282958808,
-  "text_only": 1.7334587971369426,
-  "hybrid": 1.048640489578247
+  "gbr": 3.7597078766218566,
+  "text_only": 1.504302938779195,
+  "hybrid": 1.018538514773051
  },
  {
   "id": "TEN21-en-P",
@@ -275,17 +275,17 @@
   "domain": "tenancy",
   "gold_score": 2,
   "gold_type": "EXC_REMOVED",
-  "pred_score": 7.575432379438492,
-  "pred_type": "NONE",
-  "explanation": "Legal meaning appears preserved; no legally salient difference detected.",
+  "pred_score": 7.4609245990911015,
+  "pred_type": "EXC_REMOVED",
+  "explanation": "An exception/carve-out in the original is missing, widening the rule.",
   "original": "The Tenant shall not keep any inflammable or hazardous material in the premises, except domestic cooking gas cylinders.",
   "simplification": "The tenant must not keep flammable or dangerous materials in the premises, including household cooking gas cylinders.",
   "chrF (lexical)": 7.701687230894043,
   "WordLlama cosine (semantic)": 6.101150240687744,
   "Token-alignment F1 (BERTScore-style)": 6.16197511742069,
-  "gbr": 7.575432379438492,
-  "text_only": 8.187709967295328,
-  "hybrid": 9.846888224283854
+  "gbr": 7.4609245990911015,
+  "text_only": 7.4591654141743975,
+  "hybrid": 9.792373021443685
  },
  {
   "id": "TEN07-hi-F",
@@ -293,7 +293,7 @@
   "domain": "tenancy",
   "gold_score": 10,
   "gold_type": "NONE",
-  "pred_score": 1.7552673887707684,
+  "pred_score": 1.9995935210851308,
   "pred_type": "HALLUC",
   "explanation": "Simplification adds content (new duty, condition or benefit) absent from the original.",
   "original": "प्रत्येक ग्यारह माह की समाप्ति पर किराये में पाँच प्रतिशत की वृद्धि की जाएगी।",
@@ -301,9 +301,9 @@
   "chrF (lexical)": 1.9972643997218902,
   "WordLlama cosine (semantic)": 6.241231169581765,
   "Token-alignment F1 (BERTScore-style)": 6.113545006675363,
-  "gbr": 1.7552673887707684,
-  "text_only": 8.109766483306885,
-  "hybrid": 5.4436624844868975
+  "gbr": 1.9995935210851308,
+  "text_only": 7.93455187479655,
+  "hybrid": 6.921112219492595
  },
  {
   "id": "TEN07-en-F",
@@ -311,7 +311,7 @@
   "domain": "tenancy",
   "gold_score": 10,
   "gold_type": "NONE",
-  "pred_score": 9.019730188106863,
+  "pred_score": 8.926994266522108,
   "pred_type": "NONE",
   "explanation": "Legal meaning appears preserved; no legally salient difference detected.",
   "original": "The rent shall be increased by five percent upon the expiry of every eleven months.",
@@ -319,8 +319,8 @@
   "chrF (lexical)": 3.1504496073675963,
   "WordLlama cosine (semantic)": 5.248728116490476,
   "Token-alignment F1 (BERTScore-style)": 5.0132122974200755,
-  "gbr": 9.019730188106863,
-  "text_only": 4.6781307856241865,
-  "hybrid": 7.057036717732747
+  "gbr": 8.926994266522108,
+  "text_only": 4.614751219749451,
+  "hybrid": 7.8215328852335615
  }
 ]
