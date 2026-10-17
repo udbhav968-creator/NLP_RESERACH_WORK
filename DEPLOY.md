@@ -7,7 +7,7 @@ scores in SQLite, serves the REST API (`/api/*`, docs at `/docs`) and serves the
 |---|---|---|---|
 | claude.ai artifact | free | already live (in-browser model + shared database) | the Legal Meaning Checker link (share it from its Share menu) |
 | Hugging Face Spaces | free | `deploy/push_to_hf_space.ps1` (below) | `https://<user>-legal-meaning-checker.hf.space` |
-| Render | free | Blueprint from `render.yaml` (below) | `https://legal-meaning-checker.onrender.com` |
+| Render | free | **live** — Blueprint from `render.yaml`, redeploys on every push to `main` | https://legal-meaning-checker.onrender.com |
 | Your computer | free | `uvicorn` or Docker (below) | `http://localhost:8000` |
 
 ## 1. Run locally

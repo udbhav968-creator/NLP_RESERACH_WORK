@@ -14,6 +14,8 @@ For every original–simplified legal sentence pair the system outputs:
 
 ## Full-stack app
 
+**Live:** https://legal-meaning-checker.onrender.com (web app) · [API docs](https://legal-meaning-checker.onrender.com/docs) · [health](https://legal-meaning-checker.onrender.com/api/health) — free Render instance, first request after idle takes ~50 s.
+
 | Layer | What | Where |
 |---|---|---|
 | Model | LegalDiff features (EN/HI) + gradient-boosted trees + rule explainer, trained on 640 pairs | `src/legal_features.py`, `api/lmp_service.py` |
