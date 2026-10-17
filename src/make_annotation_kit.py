@@ -1,4 +1,4 @@
-"""Create the human-annotation workbook (one per annotator) for the 320 EnHi-LMP pairs.
+"""Create the human-annotation workbook (one per annotator) for all EnHi-LMP pairs (640 in v2).
 Pairs are shuffled and given blind codes; gold/silver scores and error types are NOT shown to annotators."""
 import json, os, random, csv
 from openpyxl import Workbook

@@ -20,8 +20,6 @@ for en_mod, hi_mod, domain in [(en_insurance, hi_insurance, "insurance"), (en_te
                               simplification=pp, score=ps, error_type=pt, decision=decision(ps)))
 
 os.makedirs(os.path.join(ROOT, "data"), exist_ok=True)
-with open(os.path.join(ROOT, "data", "enhi_lmp.jsonl"), "w", encoding="utf-8") as fh:
-    for r in pairs: fh.write(json.dumps(r, ensure_ascii=False) + "\n")
 
 # Sanity holdouts (never used for training): identical -> 10, unrelated -> 1
 rng = random.Random(13)
@@ -38,9 +36,25 @@ for name, rows in [("sanity_identical", ident), ("sanity_unrelated", unrel)]:
     with open(os.path.join(ROOT, "data", name + ".jsonl"), "w", encoding="utf-8") as fh:
         for r in rows: fh.write(json.dumps(r, ensure_ascii=False) + "\n")
 
+# v2 extension: two more single-error simplifications per clause (EN + parallel HI), ids <clause>-<lang>-P2 / -P3.
+# Added after the sanity sets are built, so the sanity pairs are unchanged.
+sys.path.insert(0, os.path.join(ROOT, "data", "extra"))
+import importlib
+dom = {r["clause"]: r["domain"] for r in pairs}
+orig = {(r["clause"], r["lang"]): r["original"] for r in pairs}
+seen = collections.Counter()
+for part in ["part_ins_a", "part_ins_b", "part_ten_a", "part_ten_b"]:
+    for (cid, et, sc, en, hi) in importlib.import_module(part).EXTRA:
+        seen[cid] += 1; k = seen[cid] + 1                      # P2, P3
+        for lang, txt in [("en", en), ("hi", hi)]:
+            pairs.append(dict(id=f"{cid}-{lang}-P{k}", clause=cid, lang=lang, domain=dom[cid], original=orig[(cid, lang)],
+                              simplification=txt, score=sc, error_type=et, decision=decision(sc)))
+with open(os.path.join(ROOT, "data", "enhi_lmp.jsonl"), "w", encoding="utf-8") as fh:
+    for r in pairs: fh.write(json.dumps(r, ensure_ascii=False) + "\n")
+
 # FrJUDGE (Beauchemin et al., 2025; CC-BY-NC-SA 4.0) official splits — real human LMP labels (mean of 5 annotators)
-src = "/tmp/ext/JUDGEBERT/datastore/training"
-for split in ["train", "dev", "test"]:
+src = "/tmp/ext/JUDGEBERT/datastore/training"   # clone of github.com/GRAAL-Research/JUDGEBERT; skipped if absent
+for split in (["train", "dev", "test"] if os.path.isdir(src) else []):
     rows = [json.loads(l) for l in open(os.path.join(src, f"{split}_FrJUDGE.jsonl"), encoding="utf-8")]
     with open(os.path.join(ROOT, "data", f"frjudge_{split}.jsonl"), "w", encoding="utf-8") as fh:
         for i, r in enumerate(rows):

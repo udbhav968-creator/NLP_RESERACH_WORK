@@ -1,0 +1,306 @@
+<title>Legal Meaning Checker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Devanagari:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<style>
+/* Layout: a court-paper desk — clause in on the left, verdict slip on the right, the evidence ledger and model card below. */
+:root {
+  --paper: #F1F3EF; --surface: #FFFFFF; --ink: #17243A; --muted: #586373; --line: #D7DCD5; --accent: #2C5C8C; --accent-soft: #E3ECF5;
+  --ok: #24785A; --ok-soft: #E1F1EA; --warn: #9A6412; --warn-soft: #F6ECDC; --bad: #A83A32; --bad-soft: #F6E4E2;
+  --zone-bad: #EFD9D6; --zone-warn: #F1E6D2; --zone-ok: #D8ECE2;
+  --f-display: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --f-body: "IBM Plex Sans", "IBM Plex Sans Devanagari", "Noto Sans Devanagari", "Nirmala UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0F151D; --surface: #17202B; --ink: #E5EAF1; --muted: #9AA5B4; --line: #2A3644; --accent: #84ADDA; --accent-soft: #1D2D40;
+  --ok: #63C497; --ok-soft: #173327; --warn: #E2AD52; --warn-soft: #382A14; --bad: #EC7A70; --bad-soft: #3A1E1C;
+  --zone-bad: #3A2221; --zone-warn: #382D19; --zone-ok: #1A3428; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0F151D; --surface: #17202B; --ink: #E5EAF1; --muted: #9AA5B4; --line: #2A3644; --accent: #84ADDA; --accent-soft: #1D2D40;
+  --ok: #63C497; --ok-soft: #173327; --warn: #E2AD52; --warn-soft: #382A14; --bad: #EC7A70; --bad-soft: #3A1E1C;
+  --zone-bad: #3A2221; --zone-warn: #382D19; --zone-ok: #1A3428; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--paper); color: var(--ink); font: 15px/1.55 var(--f-body); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 48px; display: grid; gap: 28px }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; text-wrap: balance; margin: 0 }
+h1 { font-size: clamp(28px, 4.2vw, 40px); line-height: 1.12; letter-spacing: -0.01em }
+h2 { font-size: 22px }
+h3 { font-size: 16px }
+p { margin: 0 }
+.eyebrow { font: 500 12px/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent) }
+.lede { color: var(--muted); max-width: 68ch; margin-top: 10px }
+header { display: grid; gap: 6px }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 12px; color: var(--muted); font-size: 13px }
+.facts span::before { content: "§ "; color: var(--accent); font-family: var(--f-display) }
+
+.desk { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; align-items: start }
+@media (max-width: 860px) { .desk { grid-template-columns: minmax(0, 1fr) } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 14px; min-width: 0 }
+label { font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline }
+label small { font-weight: 400; color: var(--muted) }
+textarea { width: 100%; min-height: 104px; resize: vertical; padding: 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: 15px/1.6 var(--f-body) }
+textarea:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.field { display: grid; gap: 6px }
+.chips { display: flex; flex-wrap: wrap; gap: 8px }
+.chip { border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: 500 13px var(--f-body); cursor: pointer }
+.chip:hover { border-color: var(--accent) }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink) }
+.chip b { font: 500 11px var(--f-mono); color: var(--accent); margin-right: 6px }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center }
+.btn { border: 0; background: var(--accent); color: var(--surface); padding: 10px 16px; border-radius: 8px; font: 600 14px var(--f-body); cursor: pointer }
+.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line) }
+.hint { color: var(--muted); font-size: 12.5px }
+
+/* verdict slip */
+.slip { gap: 16px }
+.score-line { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap }
+.score { font: 600 56px/1 var(--f-display); font-variant-numeric: tabular-nums; letter-spacing: -0.02em }
+.score small { font: 400 18px var(--f-body); color: var(--muted); margin-left: 4px }
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 5px 12px; font: 600 13px var(--f-body) }
+.pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor }
+.pill.ok { background: var(--ok-soft); color: var(--ok) } .pill.warn { background: var(--warn-soft); color: var(--warn) } .pill.bad { background: var(--bad-soft); color: var(--bad) }
+.scale { position: relative; height: 54px }
+.scale svg { width: 100%; height: 54px; display: block; overflow: visible }
+.why { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; display: grid; gap: 4px }
+.why .type { font: 500 12px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+.why p { font-size: 15.5px }
+.meta { display: flex; gap: 8px 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted) }
+.empty { color: var(--muted) }
+
+/* evidence ledger */
+.ledger-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap }
+.toggle { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); cursor: pointer }
+.tablewrap { overflow-x: auto }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top }
+th { font: 500 11.5px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+td.num { font: 500 13px var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap }
+td code { font: 12px var(--f-mono); color: var(--muted) }
+tr.fired td:first-child { box-shadow: inset 3px 0 0 var(--warn) }
+tr.fired td.num { color: var(--warn) }
+
+/* model card */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; align-items: start }
+.card-grid > div { display: grid; gap: 10px; min-width: 0; align-content: start }
+dl { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; font-size: 14px }
+dt { color: var(--muted); font-size: 12.5px; margin-top: 8px } dt:first-child { margin-top: 0 } dd { margin: 0 }
+dl.kv { grid-template-columns: minmax(0, 1fr) auto; gap: 0 }
+dl.kv dt, dl.kv dd { margin: 0; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13.5px }
+dl.kv dt { color: var(--ink) }
+dl.kv dd { text-align: right; font: 500 13.5px var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 12px }
+ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px }
+.legend { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; font-size: 13px }
+.legend div { border-radius: 8px; padding: 10px; border: 1px solid var(--line) }
+.legend b { display: block; font: 600 13px var(--f-body) }
+.legend .z1 { background: var(--zone-bad) } .legend .z2 { background: var(--zone-warn) } .legend .z3 { background: var(--zone-ok) }
+@media (max-width: 520px) { .legend { grid-template-columns: minmax(0, 1fr) } }
+footer { color: var(--muted); font-size: 12.5px; border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between }
+a { color: var(--accent) }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">EnHi-LMP · CSET 346 NLP project · English &amp; हिन्दी</div>
+    <h1>Legal Meaning Checker</h1>
+    <p class="lede">Paste a legal clause and its plain-language rewrite, in English or Hindi. The checker scores how well the rewrite keeps the clause's legal meaning on the 1–10 JUDGEBERT scale, decides whether it is preserved, and names the legal change it found.</p>
+    <div class="facts"><span>Runs entirely in your browser</span><span>Insurance and tenancy clauses</span><span>LegalDiff-GBR model, trained on __NTRAIN__ EN–HI pairs</span></div>
+  </header>
+
+  <section class="desk" aria-label="Checker">
+    <form class="panel" id="form" autocomplete="off">
+      <div class="field">
+        <label for="orig">Original clause <small id="lang-o"></small></label>
+        <textarea id="orig" spellcheck="false"></textarea>
+      </div>
+      <div class="field">
+        <label for="simp">Plain-language rewrite <small id="lang-s"></small></label>
+        <textarea id="simp" spellcheck="false"></textarea>
+      </div>
+      <div class="row">
+        <button class="btn" type="submit">Check meaning</button>
+        <button class="btn ghost" type="button" id="clear">Clear</button>
+        <span class="hint">Scores update as you type.</span>
+      </div>
+      <div class="field">
+        <span class="hint">Try an example (made for this demo, not from the training data):</span>
+        <div class="chips" id="examples"></div>
+      </div>
+    </form>
+
+    <section class="panel slip" aria-live="polite" id="slip">
+      <div class="eyebrow">Verdict</div>
+      <div id="result"></div>
+    </section>
+  </section>
+
+  <section class="panel" aria-label="Evidence">
+    <div class="ledger-head">
+      <div>
+        <h2>What the checker compared</h2>
+        <p class="hint" style="margin-top:4px">The 19 LegalDiff signals the model scores from. A highlighted row is a difference between the original and the rewrite.</p>
+      </div>
+      <label class="toggle" for="onlyfired"><input type="checkbox" id="onlyfired"> Show only signals that fired</label>
+    </div>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Signal</th><th>What it checks</th><th style="text-align:right">Value</th></tr></thead>
+      <tbody id="feats"></tbody>
+    </table></div>
+  </section>
+
+  <section class="panel" aria-label="About the model">
+    <h2>About this checker</h2>
+    <div class="legend">
+      <div class="z1"><b>Not preserved · below 4.5</b>A core rule changed: a duty, condition, number, deadline or party.</div>
+      <div class="z2"><b>Partially preserved · 4.5 to 7.5</b>A secondary detail is lost or blurred.</div>
+      <div class="z3"><b>Preserved · 7.5 and above</b>Same legal effect in plainer words.</div>
+    </div>
+    <div class="card-grid">
+      <div>
+        <h3>Model</h3>
+        <dl>
+          <dt>Method</dt><dd>Gradient-boosted trees (200 trees, depth 3) on 19 bilingual LegalDiff features, with a rule-based explainer</dd>
+          <dt>Training data</dt><dd>__NTRAIN__ EnHi-LMP pairs (80 clauses × English and Hindi × 1 faithful + 3 single-error rewrites), plus identical (→ 10) and unrelated (→ 1) augmentation</dd>
+          <dt>Labels</dt><dd>Rubric-based silver scores, 1–10</dd>
+        </dl>
+      </div>
+      <div>
+        <h3>Measured accuracy</h3>
+        <dl id="stats" class="kv"></dl>
+        <p class="hint">5-fold cross-validation grouped by clause (English and Hindi twins never split), mean of 3 seeds. FrJUDGE is the base paper's French dataset, scored by human annotators.</p>
+      </div>
+      <div>
+        <h3>Known limits</h3>
+        <ul>
+          <li>Labels are silver; human double annotation is in progress.</li>
+          <li>Reads one sentence at a time, without definitions elsewhere in the contract.</li>
+          <li>Relies on word lists, so a meaning flip by a different verb ("does not cover" → "pays for") can be missed.</li>
+          <li>Faithful rewrites that add "you" or change wording a lot can score lower than they should.</li>
+          <li>A decision aid for reviewers, not legal advice.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Extends JUDGEBERT (Beauchemin et al., EMNLP 2025) to English, Hindi and tenancy law.</span>
+    <span>Code and data: <a href="https://github.com/udbhav968-creator/NLP_RESERACH_WORK" target="_blank" rel="noopener">github.com/udbhav968-creator/NLP_RESERACH_WORK</a></span>
+  </footer>
+</div>
+
+<script>__LMPJS__</script>
+<script>
+const DATA = __MODEL__;
+const STATS = __STATS__;
+LMP.init(DATA);
+
+const EXAMPLES = [
+  { tag: "EN", name: "Deductible raised", o: "A compulsory deductible of Rs. 2,000 shall apply to each claim under this policy.", s: "You pay the first Rs. 20,000 of each claim under this policy yourself." },
+  { tag: "EN", name: "Wrong party", o: "The Landlord shall bear the cost of all structural repairs to the premises.", s: "The tenant must pay for all structural repairs to the premises." },
+  { tag: "EN", name: "Faithful", o: "The Landlord shall bear the cost of all structural repairs to the premises.", s: "The landlord must pay for all structural repairs to the premises." },
+  { tag: "EN", name: "Must → may", o: "The insured shall notify the insurer in writing of any accident within seven days of its occurrence.", s: "You may tell the insurer in writing about an accident within seven days." },
+  { tag: "EN", name: "Exception dropped", o: "Hospital expenses are payable only if the insured is admitted for at least twenty-four hours, except for day-care procedures.", s: "Hospital costs are paid only if you stay in hospital for at least 24 hours." },
+  { tag: "HI", name: "Negation removed", o: "किरायेदार मकान मालिक की लिखित अनुमति के बिना परिसर में पालतू जानवर नहीं रखेगा।", s: "किरायेदार परिसर में पालतू जानवर रख सकता है।" },
+  { tag: "HI", name: "Deadline changed", o: "बीमित व्यक्ति दुर्घटना के सात दिनों के भीतर बीमाकर्ता को लिखित सूचना देगा।", s: "आपको दुर्घटना के 30 दिनों के भीतर बीमाकर्ता को लिखित सूचना देनी होगी।" },
+  { tag: "HI", name: "Faithful", o: "मकान मालिक परिसर की सभी संरचनात्मक मरम्मत का खर्च उठाएगा।", s: "परिसर की सभी संरचनात्मक मरम्मत का खर्च मकान मालिक देगा।" },
+];
+const TYPE_LABEL = { NONE: "No legal change found", NEGATION: "Negation reversed", MODALITY: "Obligation ↔ permission", NUMBER: "Amount or number changed", DATE: "Time limit changed",
+  OMIT_COND: "Condition dropped", EXC_REMOVED: "Exception removed", SCOPE: "Scope changed", ENTITY: "Wrong party", HALLUC: "Content added", MINOR: "Minor detail omitted" };
+const LANG = { en: "English", hi: "Hindi · हिन्दी", fr: "French" };
+const FEAT = {
+  num_missing: ["Figures dropped", "Numbers in the original that are missing from the rewrite"],
+  num_added: ["Figures added", "Numbers in the rewrite that are not in the original"],
+  dur_mismatch: ["Time limits differ", "Durations such as “7 days” or “तीन महीने” that do not match"],
+  neg_diff: ["Negation change", "Rewrite negations minus original negations (not, never, नहीं, बिना)"],
+  neg_absdiff: ["Negation difference", "Size of the negation change"],
+  oblig_diff: ["Obligation change", "Change in shall / must / होगा-type words (incl. “cannot”)"],
+  perm_diff: ["Permission change", "Change in may / can / सकता-type words"],
+  modal_flip: ["Duty ↔ permission flip", "1 when an obligation becomes a permission or the reverse"],
+  cond_lost: ["Conditions dropped", "if, unless, only, यदि, जब … missing from the rewrite"],
+  cond_added: ["Conditions added", "New condition words in the rewrite"],
+  exc_lost: ["Exceptions dropped", "except, other than, सिवाय, अलावा … missing"],
+  exc_added: ["Exceptions added", "New exception words in the rewrite"],
+  quant_absdiff: ["Scope words differ", "any, all, only, हर, केवल … counted differently"],
+  role_jaccard_dist: ["Party mismatch", "0 = same parties, 1 = no party in common"],
+  role_subject_change: ["Main party changed", "1 when the first-named party differs"],
+  len_ratio: ["Length ratio", "Rewrite length ÷ original length"],
+  coverage: ["Words kept", "Share of the original's words that appear in the rewrite"],
+  novelty: ["New words", "Share of the rewrite's words not in the original"],
+  time_word_change: ["Time units differ", "Day / month / year units present in only one text"],
+};
+const FIRED = (k, v) => ["len_ratio", "coverage", "novelty"].includes(k) ? false : v !== 0;
+
+const $ = (id) => document.getElementById(id);
+const orig = $("orig"), simp = $("simp");
+let current = -1;
+
+function fmt(v) { return Number.isInteger(v) ? String(v) : v.toFixed(2); }
+function band(s) { return s >= 7.5 ? "ok" : s >= 4.5 ? "warn" : "bad"; }
+
+function scaleSVG(s) {
+  const X = (v) => ((v - 1) / 9) * 100;
+  const ticks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) =>
+    `<line x1="${X(v)}%" x2="${X(v)}%" y1="26" y2="30" stroke="var(--muted)" stroke-width="1"/><text x="${X(v)}%" y="44" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${v}</text>`).join("");
+  return `<svg role="img" aria-label="Score ${s.toFixed(1)} on a 1 to 10 scale">
+    <rect x="0" y="10" width="${X(4.5)}%" height="16" fill="var(--zone-bad)" rx="3"/>
+    <rect x="${X(4.5)}%" y="10" width="${X(7.5) - X(4.5)}%" height="16" fill="var(--zone-warn)"/>
+    <rect x="${X(7.5)}%" y="10" width="${100 - X(7.5)}%" height="16" fill="var(--zone-ok)" rx="3"/>
+    ${ticks}
+    <line x1="${X(s)}%" x2="${X(s)}%" y1="4" y2="32" stroke="var(--ink)" stroke-width="2.5"/><circle cx="${X(s)}%" cy="4" r="4" fill="var(--ink)"/>
+  </svg>`;
+}
+
+function render() {
+  const o = orig.value.trim(), s = simp.value.trim();
+  const lo = o ? LMP.detectLang(o) : null, ls = s ? LMP.detectLang(s) : null;
+  $("lang-o").textContent = lo ? LANG[lo] : ""; $("lang-s").textContent = ls ? LANG[ls] : "";
+  if (!o || !s) {
+    $("result").innerHTML = `<p class="empty">Enter both the original clause and the rewrite to see a score.</p>`;
+    $("feats").innerHTML = ""; return;
+  }
+  const r = LMP.score(o, s);
+  const b = band(r.score);
+  const langNote = lo !== ls ? `<span>The two texts look like different languages; the checker compares within one language.</span>` : "";
+  $("result").innerHTML = `
+    <div class="score-line"><span class="score">${r.score.toFixed(1)}<small>/ 10</small></span><span class="pill ${b}">${r.decision}</span></div>
+    <div class="scale">${scaleSVG(r.score)}</div>
+    <div class="why"><span class="type">${TYPE_LABEL[r.type] || r.type}</span><p>${r.why.replace("->", "→")}</p></div>
+    <div class="meta"><span>Language: ${LANG[r.lang]}</span><span>Error type code: <code>${r.type}</code></span>${langNote}</div>`;
+  const only = $("onlyfired").checked;
+  $("feats").innerHTML = DATA.model.features.map((k) => {
+    const v = r.features[k], fired = FIRED(k, v);
+    if (only && !fired) return "";
+    return `<tr class="${fired ? "fired" : ""}"><td><b>${FEAT[k][0]}</b><br><code>${k}</code></td><td>${FEAT[k][1]}</td><td class="num">${fmt(v)}</td></tr>`;
+  }).join("") || `<tr><td colspan="3" class="hint">No differences fired for this pair.</td></tr>`;
+}
+
+function stats() {
+  const rows = [
+    ["Agreement with labels (Pearson r)", STATS.r], ["English / Hindi", STATS.r_lang], ["Average error, 1–10 scale (RMSE)", STATS.rmse],
+    ["“Not preserved” detection (F1)", STATS.npf1], ["Zero-shot on human-scored French", STATS.fr], ["Legal-error detection (F1)", STATS.det],
+    ["Identical / unrelated pairs (ideal 10 / 1)", STATS.sanity], ["Best generic metric (chrF), for comparison", STATS.chrf]];
+  $("stats").innerHTML = rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+}
+
+function buildExamples() {
+  $("examples").innerHTML = EXAMPLES.map((e, i) => `<button type="button" class="chip" data-i="${i}" aria-pressed="false"><b>${e.tag}</b>${e.name}</button>`).join("");
+  $("examples").addEventListener("click", (ev) => {
+    const b = ev.target.closest(".chip"); if (!b) return; load(+b.dataset.i);
+  });
+}
+function load(i) {
+  current = i; orig.value = EXAMPLES[i].o; simp.value = EXAMPLES[i].s;
+  document.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", String(+c.dataset.i === i)));
+  render();
+}
+let tm = null;
+function onInput() { current = -1; document.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", "false")); clearTimeout(tm); tm = setTimeout(render, 200); }
+orig.addEventListener("input", onInput); simp.addEventListener("input", onInput);
+$("form").addEventListener("submit", (e) => { e.preventDefault(); render(); });
+$("clear").addEventListener("click", () => { orig.value = ""; simp.value = ""; onInput(); render(); orig.focus(); });
+$("onlyfired").addEventListener("change", render);
+buildExamples(); stats(); load(0);
+</script>

@@ -12,6 +12,10 @@ For every original–simplified legal sentence pair the system outputs:
 | Legal error type | NONE, NEGATION, MODALITY, NUMBER, DATE, OMIT_COND, EXC_REMOVED, SCOPE, ENTITY, HALLUC, MINOR |
 | Explanation | one-sentence rationale, e.g. "Time limit changed: 7 -> 30." |
 
+## Live demo
+
+The best model (LegalDiff-GBR, trained on all 640 pairs) runs in the browser as the **Legal Meaning Checker**: `web/legal-meaning-checker.html` (open it locally) — see `web/README.md`. Results on 640 pairs (5-fold grouped CV): Pearson r 0.48 vs 0.17 for chrF; Not-preserved F1 0.75; error-detection F1 0.87; zero-shot r 0.52 on human-labelled FrJUDGE.
+
 ## Deliverables (in `deliverables/`)
 
 | File | What it is |
@@ -29,7 +33,8 @@ Paper sources (LaTeX, figure, Word builder) are in `paper/`. Windows users can t
 data/
   en_insurance.py, en_tenancy.py      # 40 + 40 English source clauses with faithful + perturbed simplifications
   hi_insurance.py, hi_tenancy.py      # parallel Hindi (Devanagari) versions, same IDs
-  enhi_lmp.jsonl                      # 320 assembled pairs (built by src/build_dataset.py)
+  extra/part_*.py                     # v2: two more single-error EN/HI rewrites per clause
+  enhi_lmp.jsonl                      # 640 assembled pairs (built by src/build_dataset.py)
   sanity_identical.jsonl              # 160 identical pairs (gold 10) – never used for training
   sanity_unrelated.jsonl              # 160 unrelated pairs (gold 1)  – never used for training
   frjudge_{train,dev,test}.jsonl      # FrJUDGE official splits (CC BY-NC-SA 4.0) for transfer tests
@@ -62,7 +67,7 @@ python src/finetune_pretrained.py --model xlm-roberta-base   # GPU: pretrained M
 
 ## Completing the project (remaining steps)
 
-1. **Human annotation.** Give `annotation/EnHi-LMP_annotation_A.xlsx` and `_B.xlsx` to two annotators (each scores all 320 pairs, 1–10, independently).
+1. **Human annotation.** Give `annotation/EnHi-LMP_annotation_A.xlsx` and `_B.xlsx` to two annotators (each scores all 640 pairs, 1–10, independently).
    Then run `python src/merge_annotations.py annotation/EnHi-LMP_annotation_A.xlsx annotation/EnHi-LMP_annotation_B.xlsx`
    → prints Krippendorff's α, writes `annotation/adjudicate.csv` (pairs differing by ≥ 3 points) and `data/enhi_lmp_human.jsonl`.
 2. **Re-run experiments on human labels:** `LMP_DATA=enhi_lmp_human.jsonl python src/run_experiments.py exp1` (then `exp2`, `exp3`, `exp5`).
@@ -108,7 +113,7 @@ python src/demo.py "original sentence" "simplified sentence"
 
 ## Data and labels
 
-80 clauses (40 insurance, 40 tenancy) × 2 languages × 2 simplifications (one faithful, one with a single injected legal error) = **320 pairs**.
+80 clauses (40 insurance, 40 tenancy) × 2 languages × 4 simplifications (one faithful, three each with a single injected legal error of a different type) = **640 pairs**, plus 160 identical and 160 unrelated sanity pairs. (v1 had one error rewrite per clause, 320 pairs; its results are kept in `results/v2_320/`.)
 Current LMP scores are **rubric-based silver labels** (see rubric below). They must be replaced by double human annotation
 (2 annotators, adjudication of differences ≥ 3, Krippendorff's α) before final reporting.
 
