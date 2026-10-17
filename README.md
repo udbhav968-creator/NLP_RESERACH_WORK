@@ -12,9 +12,23 @@ For every original–simplified legal sentence pair the system outputs:
 | Legal error type | NONE, NEGATION, MODALITY, NUMBER, DATE, OMIT_COND, EXC_REMOVED, SCOPE, ENTITY, HALLUC, MINOR |
 | Explanation | one-sentence rationale, e.g. "Time limit changed: 7 -> 30." |
 
-## Live demo
+## Full-stack app
 
-The best model (LegalDiff-GBR, trained on all 640 pairs) runs in the browser as the **Legal Meaning Checker**: `web/legal-meaning-checker.html` (open it locally) — see `web/README.md`. Results on 640 pairs (5-fold grouped CV): Pearson r 0.48 vs 0.17 for chrF; Not-preserved F1 0.75; error-detection F1 0.87; zero-shot r 0.52 on human-labelled FrJUDGE.
+| Layer | What | Where |
+|---|---|---|
+| Model | LegalDiff features (EN/HI) + gradient-boosted trees + rule explainer, trained on 640 pairs | `src/legal_features.py`, `api/lmp_service.py` |
+| Backend | FastAPI REST API (`/api/score`, `/api/batch`, `/api/batch/csv`, `/api/feedback`, `/api/history`, `/api/stats`, docs at `/docs`) with SQLite storage | `api/main.py`, `api/storage.py` |
+| Frontend | One web app: Check, Batch, History, Dashboard, API pages. Uses the API when served by it; otherwise runs the same model in the browser (`web/lmp.js`, identical scores) | `frontend/app_template.html` → `python frontend/build.py` |
+| Tests & CI | 7 API tests, JS-vs-Python parity on 1,053 pairs, Docker smoke test | `api/tests/`, `web/test.js`, `.github/workflows/ci.yml` |
+| Deploy | Docker image; Hugging Face Spaces, Render, docker-compose; live on claude.ai | `Dockerfile`, `render.yaml`, `deploy/`, `DEPLOY.md` |
+
+```bash
+pip install -r api/requirements.txt
+uvicorn api.main:app --port 8000      # web app at http://localhost:8000, API docs at /docs
+```
+
+Results on 640 pairs (5-fold grouped CV): Pearson r 0.48 vs 0.17 for chrF; Not-preserved F1 0.75; error-detection F1 0.87;
+zero-shot r 0.52 on human-labelled FrJUDGE.
 
 ## Deliverables (in `deliverables/`)
 

@@ -1,0 +1,11 @@
+# Render Blueprint: render.com → New → Blueprint → connect this GitHub repo → Apply.
+services:
+  - type: web
+    name: legal-meaning-checker
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: LMP_DB
+        value: /app/api/data/lmp.sqlite3

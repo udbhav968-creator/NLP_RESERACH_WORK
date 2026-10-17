@@ -4,3 +4,6 @@ __pycache__/
 venv/
 *.zip
 ~$*
+api/data/
+api/model.joblib
+web/tests.json

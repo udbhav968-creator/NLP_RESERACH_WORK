@@ -1,0 +1,12 @@
+.git
+.venv
+venv
+**/__pycache__
+*.pyc
+deliverables
+paper
+annotation
+results
+api/data
+api/model.joblib
+*.zip

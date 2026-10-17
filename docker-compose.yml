@@ -1,0 +1,10 @@
+services:
+  lmp-checker:
+    build: .
+    ports: ["7860:7860"]
+    environment:
+      - LMP_DB=/app/api/data/lmp.sqlite3
+    volumes:
+      - lmp-data:/app/api/data      # keeps saved checks and human scores across restarts
+volumes:
+  lmp-data:

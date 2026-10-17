@@ -1,0 +1,692 @@
+<title>Legal Meaning Checker</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Devanagari:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<style>
+/* Layout: a court-paper desk. A sticky tab bar switches between the five working rooms of the app:
+   Check (clause in, verdict slip out), Batch, History (the shared register), Dashboard and API. */
+:root {
+  --paper: #F1F3EF; --surface: #FFFFFF; --ink: #17243A; --muted: #586373; --line: #D7DCD5; --accent: #2C5C8C; --accent-soft: #E3ECF5;
+  --ok: #24785A; --ok-soft: #E1F1EA; --warn: #9A6412; --warn-soft: #F6ECDC; --bad: #A83A32; --bad-soft: #F6E4E2;
+  --zone-bad: #EFD9D6; --zone-warn: #F1E6D2; --zone-ok: #D8ECE2; --bar: #9AA8B8;
+  --f-display: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+  --f-body: "IBM Plex Sans", "IBM Plex Sans Devanagari", "Noto Sans Devanagari", "Nirmala UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #0F151D; --surface: #17202B; --ink: #E5EAF1; --muted: #9AA5B4; --line: #2A3644; --accent: #84ADDA; --accent-soft: #1D2D40;
+  --ok: #63C497; --ok-soft: #173327; --warn: #E2AD52; --warn-soft: #382A14; --bad: #EC7A70; --bad-soft: #3A1E1C;
+  --zone-bad: #3A2221; --zone-warn: #382D19; --zone-ok: #1A3428; --bar: #4E5C6C; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --paper: #0F151D; --surface: #17202B; --ink: #E5EAF1; --muted: #9AA5B4; --line: #2A3644; --accent: #84ADDA; --accent-soft: #1D2D40;
+  --ok: #63C497; --ok-soft: #173327; --warn: #E2AD52; --warn-soft: #382A14; --bad: #EC7A70; --bad-soft: #3A1E1C;
+  --zone-bad: #3A2221; --zone-warn: #382D19; --zone-ok: #1A3428; --bar: #4E5C6C; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--paper); color: var(--ink); font: 15px/1.55 var(--f-body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--paper) }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main.wrap { padding-block: 20px 48px; display: grid; gap: 22px }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 600; text-wrap: balance; margin: 0 }
+h1 { font-size: clamp(26px, 4vw, 38px); line-height: 1.12; letter-spacing: -0.01em }
+h2 { font-size: 21px } h3 { font-size: 16px }
+p { margin: 0 }
+.eyebrow { font: 500 12px/1.2 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent) }
+.lede { color: var(--muted); max-width: 70ch; margin-top: 8px }
+header.top { padding-block: 26px 4px; display: grid; gap: 6px }
+.status { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 10px; font-size: 13px; color: var(--muted) }
+.badge { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 11px; font: 500 12.5px var(--f-body); color: var(--ink) }
+.badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted) }
+.badge.live::before { background: var(--ok) } .badge.server::before { background: var(--accent) } .badge.offline::before { background: var(--warn) }
+
+nav.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--paper); border-bottom: 1px solid var(--line) }
+nav.tabs .wrap { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none }
+nav.tabs button { border: 0; background: none; color: var(--muted); font: 600 14px var(--f-body); padding: 12px 12px 11px; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap }
+nav.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent) }
+nav.tabs button .n { font: 500 11px var(--f-mono); color: var(--muted); margin-left: 6px }
+
+.desk { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 20px; align-items: start }
+@media (max-width: 860px) { .desk { grid-template-columns: minmax(0, 1fr) } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 14px; min-width: 0; align-content: start }
+label { font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; gap: 8px; align-items: baseline }
+label small { font-weight: 400; color: var(--muted) }
+textarea, input[type="text"], input[type="search"] { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: 15px/1.55 var(--f-body) }
+textarea { min-height: 100px; resize: vertical }
+textarea:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.field { display: grid; gap: 6px }
+.chips { display: flex; flex-wrap: wrap; gap: 8px }
+.chip { border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: 500 13px var(--f-body); cursor: pointer }
+.chip:hover { border-color: var(--accent) }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent) }
+.chip b { font: 500 11px var(--f-mono); color: var(--accent); margin-right: 6px }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center }
+.btn { border: 0; background: var(--accent); color: var(--surface); padding: 10px 16px; border-radius: 8px; font: 600 14px var(--f-body); cursor: pointer }
+.btn:disabled { opacity: .5; cursor: not-allowed }
+.btn.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line) }
+.btn.small { padding: 6px 11px; font-size: 13px }
+.hint { color: var(--muted); font-size: 12.5px }
+.note { font-size: 13px; padding: 8px 12px; border-radius: 8px; background: var(--accent-soft) }
+.note.warn { background: var(--warn-soft) } .note.bad { background: var(--bad-soft) } .note.ok { background: var(--ok-soft) }
+
+.score-line { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap }
+.score { font: 600 56px/1 var(--f-display); font-variant-numeric: tabular-nums; letter-spacing: -0.02em }
+.score small { font: 400 18px var(--f-body); color: var(--muted); margin-left: 4px }
+.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 4px 11px; font: 600 12.5px var(--f-body); white-space: nowrap }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor }
+.pill.ok { background: var(--ok-soft); color: var(--ok) } .pill.warn { background: var(--warn-soft); color: var(--warn) } .pill.bad { background: var(--bad-soft); color: var(--bad) }
+.scale svg { width: 100%; height: 50px; display: block; overflow: visible }
+.why { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; display: grid; gap: 4px }
+.why .type { font: 500 12px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted) }
+.why p { font-size: 15.5px }
+.meta { display: flex; gap: 6px 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted) }
+.sub { border-top: 1px solid var(--line); padding-top: 14px; display: grid; gap: 10px }
+.scorepick { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px }
+.scorepick button { border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 6px; padding: 7px 0; font: 600 13px var(--f-mono); cursor: pointer }
+.scorepick button[aria-pressed="true"] { background: var(--accent); color: var(--surface); border-color: var(--accent) }
+.opinion { display: grid; gap: 6px; font-size: 14.5px }
+.opinion .verdict { font-weight: 600 }
+
+.tablewrap { overflow-x: auto }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top }
+th { font: 500 11.5px var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap }
+td.num { font: 500 13px var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap }
+td code { font: 12px var(--f-mono); color: var(--muted) }
+td.clip { max-width: 340px }
+td.clip span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden }
+tr.fired td:first-child { box-shadow: inset 3px 0 0 var(--warn) }
+tr.fired td.num { color: var(--warn) }
+tr.click { cursor: pointer } tr.click:hover td { background: var(--accent-soft) }
+.ledger-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap }
+.toggle { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); cursor: pointer; font-weight: 400 }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 2px }
+.kpi .v { font: 600 30px/1.1 var(--f-display); font-variant-numeric: tabular-nums }
+.kpi .k { font-size: 12.5px; color: var(--muted) }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; align-items: start }
+.chart svg { width: 100%; display: block }
+dl.kv { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; font-size: 13.5px }
+dl.kv dt, dl.kv dd { margin: 0; padding: 7px 0; border-bottom: 1px solid var(--line) }
+dl.kv dd { text-align: right; font: 500 13.5px var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; padding-left: 12px }
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px }
+.legend { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; font-size: 13px }
+.legend div { border-radius: 8px; padding: 10px; border: 1px solid var(--line) }
+.legend b { display: block; font: 600 13px var(--f-body) }
+.legend .z1 { background: var(--zone-bad) } .legend .z2 { background: var(--zone-warn) } .legend .z3 { background: var(--zone-ok) }
+@media (max-width: 560px) { .legend { grid-template-columns: minmax(0, 1fr) } }
+pre.code { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 12px; overflow-x: auto; font: 12.5px/1.55 var(--f-mono); white-space: pre }
+.ep { font: 600 12px var(--f-mono); padding: 2px 7px; border-radius: 5px; background: var(--accent-soft); color: var(--accent) }
+.empty { color: var(--muted); padding: 18px 0; text-align: center }
+footer { color: var(--muted); font-size: 12.5px; border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between }
+a { color: var(--accent) }
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--paper); padding: 9px 16px; border-radius: 8px; font-size: 14px; z-index: 20; max-width: calc(100% - 32px) }
+[data-room] { display: grid; gap: 20px }
+</style>
+
+<header class="wrap top">
+  <div class="eyebrow">EnHi-LMP · CSET 346 NLP project · English &amp; हिन्दी</div>
+  <h1>Legal Meaning Checker</h1>
+  <p class="lede">Checks whether a plain-language rewrite of an insurance or tenancy clause keeps its legal meaning. It scores the pair on the 1–10 JUDGEBERT scale, decides whether the meaning is preserved, and names the legal change it found.</p>
+  <div class="status"><span class="badge" id="mode">Starting…</span><span id="modeNote">LegalDiff-GBR · trained on __NTRAIN__ EN–HI pairs</span></div>
+</header>
+
+<nav class="tabs" aria-label="Sections"><div class="wrap" role="tablist">
+  <button role="tab" data-tab="check" aria-selected="true">Check</button>
+  <button role="tab" data-tab="batch" aria-selected="false">Batch</button>
+  <button role="tab" data-tab="history" aria-selected="false">History<span class="n" id="nHist"></span></button>
+  <button role="tab" data-tab="dashboard" aria-selected="false">Dashboard</button>
+  <button role="tab" data-tab="api" aria-selected="false">API &amp; deploy</button>
+</div></nav>
+
+<main class="wrap">
+  <!-- ============================== CHECK -->
+  <section data-room="check">
+    <div class="desk">
+      <form class="panel" id="form" autocomplete="off">
+        <div class="field"><label for="orig">Original clause <small id="lang-o"></small></label><textarea id="orig" spellcheck="false"></textarea></div>
+        <div class="field"><label for="simp">Plain-language rewrite <small id="lang-s"></small></label><textarea id="simp" spellcheck="false"></textarea></div>
+        <div class="row">
+          <button class="btn" type="submit" id="saveBtn">Check and save</button>
+          <button class="btn ghost" type="button" id="clear">Clear</button>
+          <span class="hint" id="saveHint">The verdict updates as you type; saving adds it to History.</span>
+        </div>
+        <div class="field">
+          <span class="hint">Examples (written for this demo, not taken from the training data):</span>
+          <div class="chips" id="examples"></div>
+        </div>
+      </form>
+      <section class="panel" aria-live="polite">
+        <div class="eyebrow">Verdict</div>
+        <div id="result"></div>
+        <div class="sub" id="feedbackBox" hidden>
+          <h3>Do you agree? Give your own score</h3>
+          <div class="scorepick" id="pick" role="group" aria-label="Your score from 1 to 10"></div>
+          <input type="text" id="fbComment" maxlength="300" placeholder="Optional: what changed, in a few words">
+          <div class="row"><button class="btn small" type="button" id="fbSend" disabled>Send my score</button><span class="hint" id="fbHint"></span></div>
+        </div>
+        <div class="sub" id="opinionBox" hidden>
+          <div class="row" style="justify-content:space-between"><h3>Second opinion from Claude</h3><button class="btn ghost small" type="button" id="askClaude">Ask Claude</button></div>
+          <div class="opinion" id="opinion"><p class="hint">Claude reads the same pair and gives its own score and reason. It uses your Claude account.</p></div>
+        </div>
+      </section>
+    </div>
+    <section class="panel" aria-label="Evidence">
+      <div class="ledger-head">
+        <div><h2>What the checker compared</h2><p class="hint" style="margin-top:4px">The 19 LegalDiff signals the model scores from. A highlighted row is a difference between the original and the rewrite.</p></div>
+        <label class="toggle" for="onlyfired"><input type="checkbox" id="onlyfired"> Show only signals that fired</label>
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>Signal</th><th>What it checks</th><th style="text-align:right">Value</th></tr></thead><tbody id="feats"></tbody></table></div>
+    </section>
+  </section>
+
+  <!-- ============================== BATCH -->
+  <section data-room="batch" hidden>
+    <section class="panel">
+      <h2>Check many pairs at once</h2>
+      <p class="hint">Paste one pair per line as <code>original⇥rewrite</code> (tab-separated), or a CSV with a header row <code>original,simplification</code>. Up to 500 pairs.</p>
+      <textarea id="batchIn" style="min-height:160px" spellcheck="false"></textarea>
+      <div class="row">
+        <button class="btn" type="button" id="batchRun">Score all</button>
+        <label class="btn ghost" for="batchFile" style="font-weight:600">Upload CSV<input type="file" id="batchFile" accept=".csv,text/csv,.tsv,.txt" hidden></label>
+        <button class="btn ghost" type="button" id="batchSample">Load sample pairs</button>
+        <button class="btn ghost" type="button" id="batchDl" disabled>Download results (CSV)</button>
+        <span class="hint" id="batchHint"></span>
+      </div>
+    </section>
+    <div class="kpis" id="batchKpis" hidden></div>
+    <section class="panel" id="batchOut" hidden>
+      <div class="tablewrap"><table><thead><tr><th>#</th><th>Original</th><th>Rewrite</th><th style="text-align:right">Score</th><th>Decision</th><th>Change found</th></tr></thead><tbody id="batchRows"></tbody></table></div>
+    </section>
+  </section>
+
+  <!-- ============================== HISTORY -->
+  <section data-room="history" hidden>
+    <section class="panel">
+      <div class="ledger-head">
+        <div><h2>History</h2><p class="hint" id="histNote" style="margin-top:4px"></p></div>
+        <div class="row"><input type="search" id="histQ" placeholder="Search clauses" style="width:220px"><span class="chips" id="histFilter"></span></div>
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>When</th><th>Original → rewrite</th><th style="text-align:right">Score</th><th>Decision</th><th>Change</th><th>Human scores</th><th>By</th></tr></thead><tbody id="histRows"></tbody></table></div>
+    </section>
+  </section>
+
+  <!-- ============================== DASHBOARD -->
+  <section data-room="dashboard" hidden>
+    <div class="kpis" id="dashKpis"></div>
+    <div class="grid2">
+      <section class="panel chart"><h3>Changes found in saved checks</h3><div id="dashTypes"></div></section>
+      <section class="panel"><h3>Model vs. human scores</h3><dl class="kv" id="dashHuman"></dl><p class="hint">Every “Send my score” on the Check page becomes a human label. They are the start of the human annotation that will replace the silver labels.</p></section>
+    </div>
+    <section class="panel">
+      <h2>About the model</h2>
+      <div class="legend">
+        <div class="z1"><b>Not preserved · below 4.5</b>A core rule changed: a duty, condition, number, deadline or party.</div>
+        <div class="z2"><b>Partially preserved · 4.5 to 7.5</b>A secondary detail is lost or blurred.</div>
+        <div class="z3"><b>Preserved · 7.5 and above</b>Same legal effect in plainer words.</div>
+      </div>
+      <div class="grid2">
+        <div style="display:grid;gap:10px"><h3>Measured accuracy</h3><dl class="kv" id="cvStats"></dl>
+          <p class="hint">5-fold cross-validation grouped by clause (English and Hindi twins never split), mean of 3 seeds. FrJUDGE is the base paper's French dataset, scored by human annotators.</p></div>
+        <div style="display:grid;gap:10px"><h3>Known limits</h3><ul class="plain">
+          <li>Labels are rubric-based silver scores; human double annotation is in progress.</li>
+          <li>Reads one sentence at a time, without definitions elsewhere in the contract.</li>
+          <li>Relies on word lists, so a meaning flip by a different verb can be missed.</li>
+          <li>Faithful rewrites with heavy rewording can score lower than they should.</li>
+          <li>A decision aid for reviewers, not legal advice.</li></ul></div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ============================== API -->
+  <section data-room="api" hidden>
+    <section class="panel">
+      <h2>How the stack fits together</h2>
+      <div class="tablewrap"><table><thead><tr><th>Layer</th><th>What it is</th><th>Where</th></tr></thead><tbody>
+        <tr><td><b>Model</b></td><td>LegalDiff (19 bilingual legal-difference features) + gradient-boosted trees + rule-based explainer, trained on 640 EnHi-LMP pairs</td><td><code>src/legal_features.py</code>, <code>api/lmp_service.py</code></td></tr>
+        <tr><td><b>Backend</b></td><td>FastAPI REST API with SQLite storage for checks and human feedback; OpenAPI docs at <code>/docs</code></td><td><code>api/main.py</code>, <code>api/storage.py</code></td></tr>
+        <tr><td><b>Frontend</b></td><td>This app. It talks to the API when served by it, and otherwise runs the same model in the browser (JavaScript port, identical scores)</td><td><code>frontend/</code>, <code>web/lmp.js</code></td></tr>
+        <tr><td><b>Ops</b></td><td>Docker image, Hugging Face Spaces and Render configs, GitHub Actions CI (API tests + JS-vs-Python parity test)</td><td><code>Dockerfile</code>, <code>render.yaml</code>, <code>.github/workflows/ci.yml</code></td></tr>
+      </tbody></table></div>
+      <p class="hint" id="apiBaseNote"></p>
+    </section>
+    <section class="panel">
+      <h2>REST API</h2>
+      <div class="tablewrap"><table><thead><tr><th>Method</th><th>Path</th><th>What it does</th></tr></thead><tbody>
+        <tr><td><span class="ep">GET</span></td><td><code>/api/health</code></td><td>Status, model, number of stored checks</td></tr>
+        <tr><td><span class="ep">GET</span></td><td><code>/api/model</code></td><td>Model card: features, thresholds, cross-validated accuracy</td></tr>
+        <tr><td><span class="ep">POST</span></td><td><code>/api/score</code></td><td>Score one pair: score, decision, error type, explanation, 19 signals; saved unless <code>save:false</code></td></tr>
+        <tr><td><span class="ep">POST</span></td><td><code>/api/batch</code></td><td>Score up to 500 pairs in one call</td></tr>
+        <tr><td><span class="ep">POST</span></td><td><code>/api/batch/csv</code></td><td>Upload a CSV (<code>original,simplification</code>); get it back with scores added</td></tr>
+        <tr><td><span class="ep">POST</span></td><td><code>/api/feedback</code></td><td>Store a human score (1–10) for a saved check</td></tr>
+        <tr><td><span class="ep">GET</span></td><td><code>/api/history</code></td><td>Saved checks, newest first, with human-score counts</td></tr>
+        <tr><td><span class="ep">GET</span></td><td><code>/api/stats</code></td><td>Totals by decision, error type and language; model-vs-human agreement</td></tr>
+      </tbody></table></div>
+      <pre class="code" id="curl"></pre>
+    </section>
+    <section class="panel">
+      <h2>Deploy your own copy</h2>
+      <pre class="code">git clone https://github.com/udbhav968-creator/NLP_RESERACH_WORK.git
+cd NLP_RESERACH_WORK
+
+# 1. Run locally (Python 3.10+)
+pip install -r api/requirements.txt
+uvicorn api.main:app --port 8000          # open http://localhost:8000  ·  docs at /docs
+
+# 2. Or with Docker
+docker build -t lmp-checker .
+docker run -p 7860:7860 lmp-checker       # open http://localhost:7860
+
+# 3. Public hosting: Hugging Face Spaces (Docker SDK) or Render — see DEPLOY.md</pre>
+    </section>
+  </section>
+
+  <footer>
+    <span>Extends JUDGEBERT (Beauchemin et al., EMNLP 2025) to English, Hindi and tenancy law.</span>
+    <span>Code and data: <a href="https://github.com/udbhav968-creator/NLP_RESERACH_WORK" target="_blank" rel="noopener">github.com/udbhav968-creator/NLP_RESERACH_WORK</a></span>
+  </footer>
+</main>
+
+<script>__LMPJS__</script>
+<script>
+const DATA = __MODEL__;
+const CV = __STATS__;
+LMP.init(DATA);
+
+const EXAMPLES = [
+  { tag: "EN", name: "Deductible raised", o: "A compulsory deductible of Rs. 2,000 shall apply to each claim under this policy.", s: "You pay the first Rs. 20,000 of each claim under this policy yourself." },
+  { tag: "EN", name: "Wrong party", o: "The Landlord shall bear the cost of all structural repairs to the premises.", s: "The tenant must pay for all structural repairs to the premises." },
+  { tag: "EN", name: "Faithful", o: "The Landlord shall bear the cost of all structural repairs to the premises.", s: "The landlord must pay for all structural repairs to the premises." },
+  { tag: "EN", name: "Must → may", o: "The insured shall notify the insurer in writing of any accident within seven days of its occurrence.", s: "You may tell the insurer in writing about an accident within seven days." },
+  { tag: "EN", name: "Exception dropped", o: "Hospital expenses are payable only if the insured is admitted for at least twenty-four hours, except for day-care procedures.", s: "Hospital costs are paid only if you stay in hospital for at least 24 hours." },
+  { tag: "HI", name: "Negation removed", o: "किरायेदार मकान मालिक की लिखित अनुमति के बिना परिसर में पालतू जानवर नहीं रखेगा।", s: "किरायेदार परिसर में पालतू जानवर रख सकता है।" },
+  { tag: "HI", name: "Deadline changed", o: "बीमित व्यक्ति दुर्घटना के सात दिनों के भीतर बीमाकर्ता को लिखित सूचना देगा।", s: "आपको दुर्घटना के 30 दिनों के भीतर बीमाकर्ता को लिखित सूचना देनी होगी।" },
+  { tag: "HI", name: "Faithful", o: "मकान मालिक परिसर की सभी संरचनात्मक मरम्मत का खर्च उठाएगा।", s: "परिसर की सभी संरचनात्मक मरम्मत का खर्च मकान मालिक देगा।" },
+];
+const TYPE_LABEL = { NONE: "No legal change found", NEGATION: "Negation reversed", MODALITY: "Obligation ↔ permission", NUMBER: "Amount or number changed", DATE: "Time limit changed",
+  OMIT_COND: "Condition dropped", EXC_REMOVED: "Exception removed", SCOPE: "Scope changed", ENTITY: "Wrong party", HALLUC: "Content added", MINOR: "Minor detail omitted" };
+const LANG = { en: "English", hi: "Hindi · हिन्दी", fr: "French" };
+const FEAT = {
+  num_missing: ["Figures dropped", "Numbers in the original that are missing from the rewrite"],
+  num_added: ["Figures added", "Numbers in the rewrite that are not in the original"],
+  dur_mismatch: ["Time limits differ", "Durations such as “7 days” or “तीन महीने” that do not match"],
+  neg_diff: ["Negation change", "Rewrite negations minus original negations (not, never, नहीं, बिना)"],
+  neg_absdiff: ["Negation difference", "Size of the negation change"],
+  oblig_diff: ["Obligation change", "Change in shall / must / होगा-type words (incl. “cannot”)"],
+  perm_diff: ["Permission change", "Change in may / can / सकता-type words"],
+  modal_flip: ["Duty ↔ permission flip", "1 when an obligation becomes a permission or the reverse"],
+  cond_lost: ["Conditions dropped", "if, unless, only, यदि, जब … missing from the rewrite"],
+  cond_added: ["Conditions added", "New condition words in the rewrite"],
+  exc_lost: ["Exceptions dropped", "except, other than, सिवाय, अलावा … missing"],
+  exc_added: ["Exceptions added", "New exception words in the rewrite"],
+  quant_absdiff: ["Scope words differ", "any, all, only, हर, केवल … counted differently"],
+  role_jaccard_dist: ["Party mismatch", "0 = same parties, 1 = no party in common"],
+  role_subject_change: ["Main party changed", "1 when the first-named party differs"],
+  len_ratio: ["Length ratio", "Rewrite length ÷ original length"],
+  coverage: ["Words kept", "Share of the original's words that appear in the rewrite"],
+  novelty: ["New words", "Share of the rewrite's words not in the original"],
+  time_word_change: ["Time units differ", "Day / month / year units present in only one text"],
+};
+const FIRED = (k, v) => ["len_ratio", "coverage", "novelty"].includes(k) ? false : v !== 0;
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const band = (s) => (s >= 7.5 ? "ok" : s >= 4.5 ? "warn" : "bad");
+const fmt = (v) => (Number.isInteger(v) ? String(v) : v.toFixed(2));
+function toast(msg) { const t = document.createElement("div"); t.className = "toast"; t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 2600); }
+function ago(ms) { const s = (Date.now() - ms) / 1000; if (s < 60) return "just now"; if (s < 3600) return Math.floor(s / 60) + " min ago"; if (s < 86400) return Math.floor(s / 3600) + " h ago"; return new Date(ms).toLocaleDateString(); }
+
+// ================================================================== backends
+// One interface, three implementations:
+//   artifact — claude.ai: in-browser model, shared history in the artifact's db, Claude second opinion, file downloads
+//   api      — served by the FastAPI backend: scoring, history, feedback and stats through /api/*
+//   local    — any static host or a saved file: in-browser model, history kept in this browser only
+const B = { mode: "local", db: null, user: null, sample: null, downloads: null, me: null, canWrite: true, history: [], feedback: [] };
+
+function rec(o, s, r, extra = {}) {
+  return Object.assign({ o, s, lang: r.lang, score: r.score, decision: r.decision, type: r.type, why: r.why, at: Date.now(), src: "web" }, extra);
+}
+const LS = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch { return []; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage unavailable: keep in memory */ } },
+};
+
+async function startBackend() {
+  if (window.claude && typeof window.claude.use === "function") {
+    B.mode = "pending"; setMode("pending", "Connecting to shared history…");
+    const [db, user, sample, downloads] = await Promise.all(["db", "user", "sample", "downloads"].map((n) => window.claude.use(n).catch(() => null)));
+    B.sample = sample; B.downloads = downloads; B.user = user;
+    if (db) {
+      B.db = db; B.mode = "artifact";
+      B.me = user ? await user.id() : null;
+      const cw = user ? await user.can("data.write") : null;
+      B.canWrite = cw !== false;
+      db.collection("checks").orderBy("at", "desc").limit(300).onSnapshot((snap) => {
+        B.history = snap.docs.map((d) => Object.assign({ id: d.id }, d.data())); onData();
+      }, () => {});
+      db.collection("feedback").orderBy("at", "desc").limit(1000).onSnapshot((snap) => {
+        B.feedback = snap.docs.map((d) => Object.assign({ id: d.id }, d.data())); onData();
+      }, () => {});
+      setMode("live", B.canWrite ? "Shared history: every saved check and human score is visible to everyone with this page" : "View only: you can check pairs, but saving needs Contributor access");
+    } else { useLocal(); }
+    $("opinionBox").hidden = !B.sample;
+    return;
+  }
+  try {
+    const r = await fetch("api/health", { cache: "no-store" });
+    const j = r.ok ? await r.json() : null;
+    if (j && j.status === "ok") {
+      B.mode = "api"; setMode("server", `FastAPI backend v${j.version}`);
+      await refreshApiHistory(); return;
+    }
+  } catch { /* no API here */ }
+  useLocal();
+}
+function useLocal() {
+  B.mode = "local"; B.history = LS.get("lmc.history"); B.feedback = LS.get("lmc.feedback");
+  setMode("offline", "Offline mode: checks are scored in your browser and history stays on this device"); onData();
+}
+function setMode(kind, note) {
+  const m = $("mode"); m.className = "badge " + (kind === "live" ? "live" : kind === "server" ? "server" : kind === "offline" ? "offline" : "");
+  m.textContent = { live: "Live · shared", server: "Server API", offline: "Offline", pending: "Connecting" }[kind] || kind;
+  $("modeNote").textContent = note; updateSaveUi();
+}
+async function refreshApiHistory() {
+  const j = await (await fetch("api/history?limit=300")).json();
+  B.history = j.items.map((c) => ({ id: String(c.id), o: c.original, s: c.simplification, lang: c.lang, score: c.score, decision: c.decision,
+    type: c.error_type, why: c.explanation, at: c.created_at * 1000, src: c.source, nFb: c.n_feedback, humanMean: c.human_mean }));
+  if (B.mode === "api") $("modeNote").textContent = `FastAPI backend · ${B.history.length} saved check${B.history.length === 1 ? "" : "s"} · docs at /docs`;
+  onData();
+}
+
+async function saveCheck(o, s, r) {
+  if (B.mode === "api") {
+    const res = await fetch("api/score", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ original: o, simplification: s, save: true }) });
+    if (!res.ok) throw new Error("The server refused the check (" + res.status + ")");
+    const j = await res.json(); await refreshApiHistory();
+    return { id: String(j.id), server: { score: j.score, decision: j.decision, type: j.error_type, why: j.explanation, lang: j.lang } };
+  }
+  if (B.mode === "artifact") {
+    const ref = await B.db.collection("checks").add(rec(o, s, r, { by: B.me }));
+    return { id: ref.id };
+  }
+  const id = "l" + Date.now().toString(36); B.history = [Object.assign({ id }, rec(o, s, r))].concat(B.history).slice(0, 200);
+  LS.set("lmc.history", B.history); onData(); return { id };
+}
+async function sendFeedback(checkId, human, comment) {
+  if (B.mode === "api") {
+    const res = await fetch("api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ check_id: Number(checkId), human_score: human, comment: comment || null }) });
+    if (!res.ok) throw new Error("The server refused the score (" + res.status + ")");
+    await refreshApiHistory(); return;
+  }
+  const doc = { checkId, human, comment: comment || "", by: B.me, at: Date.now() };
+  if (B.mode === "artifact") { await B.db.collection("feedback").doc(checkId + "_" + (B.me || "anon")).set(doc); return; }
+  B.feedback = [Object.assign({ id: checkId + "_me" }, doc)].concat(B.feedback.filter((f) => f.id !== checkId + "_me")); LS.set("lmc.feedback", B.feedback); onData();
+}
+function feedbackFor(checkId) {
+  if (B.mode === "api") { const h = B.history.find((x) => x.id === checkId); return h && h.nFb ? { n: h.nFb, mean: h.humanMean } : { n: 0 }; }
+  const f = B.feedback.filter((x) => x.checkId === checkId); return f.length ? { n: f.length, mean: f.reduce((a, b) => a + b.human, 0) / f.length } : { n: 0 };
+}
+async function saveFile(filename, text) {
+  if (B.mode === "artifact") {
+    if (!B.downloads) { toast("Downloads are not available in this view"); return; }
+    try { await B.downloads.save({ filename, data: text }); } catch (e) { if (e && e.code !== "declined") toast("The file could not be saved here"); }
+    return;
+  }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: "text/csv" })); a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+// ================================================================== check room
+const orig = $("orig"), simp = $("simp");
+let current = null;            // {o, s, r, savedId}
+let picked = 0;
+
+function scaleSVG(s) {
+  const X = (v) => ((v - 1) / 9) * 100;
+  const ticks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) => `<line x1="${X(v)}%" x2="${X(v)}%" y1="26" y2="30" stroke="var(--muted)"/><text x="${X(v)}%" y="44" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="var(--f-mono)">${v}</text>`).join("");
+  return `<svg role="img" aria-label="Score ${s.toFixed(1)} on a 1 to 10 scale"><rect x="0" y="10" width="${X(4.5)}%" height="16" fill="var(--zone-bad)" rx="3"/><rect x="${X(4.5)}%" y="10" width="${X(7.5) - X(4.5)}%" height="16" fill="var(--zone-warn)"/><rect x="${X(7.5)}%" y="10" width="${100 - X(7.5)}%" height="16" fill="var(--zone-ok)" rx="3"/>${ticks}<line x1="${X(s)}%" x2="${X(s)}%" y1="4" y2="32" stroke="var(--ink)" stroke-width="2.5"/><circle cx="${X(s)}%" cy="4" r="4" fill="var(--ink)"/></svg>`;
+}
+function renderVerdict(r, extraMeta = "") {
+  const lo = LMP.detectLang(current.o), ls = LMP.detectLang(current.s);
+  const langNote = lo !== ls ? `<span>The two texts look like different languages; the checker compares within one language.</span>` : "";
+  $("result").innerHTML = `
+    <div class="score-line"><span class="score">${r.score.toFixed(1)}<small>/ 10</small></span><span class="pill ${band(r.score)}">${esc(r.decision)}</span></div>
+    <div class="scale">${scaleSVG(r.score)}</div>
+    <div class="why"><span class="type">${esc(TYPE_LABEL[r.type] || r.type)}</span><p>${esc(r.why.replace("->", "→"))}</p></div>
+    <div class="meta"><span>Language: ${esc(LANG[r.lang] || r.lang)}</span><span>Code: <code>${esc(r.type)}</code></span>${extraMeta}${langNote}</div>`;
+}
+function renderFeatures(f) {
+  const only = $("onlyfired").checked;
+  $("feats").innerHTML = DATA.model.features.map((k) => {
+    const v = f[k], fired = FIRED(k, v); if (only && !fired) return "";
+    return `<tr class="${fired ? "fired" : ""}"><td><b>${FEAT[k][0]}</b><br><code>${k}</code></td><td>${FEAT[k][1]}</td><td class="num">${fmt(v)}</td></tr>`;
+  }).join("") || `<tr><td colspan="3" class="hint">No differences fired for this pair.</td></tr>`;
+}
+function preview() {
+  const o = orig.value.trim(), s = simp.value.trim();
+  $("lang-o").textContent = o ? LANG[LMP.detectLang(o)] : ""; $("lang-s").textContent = s ? LANG[LMP.detectLang(s)] : "";
+  if (!o || !s) { current = null; $("result").innerHTML = `<p class="empty">Enter both the original clause and the rewrite to see a verdict.</p>`; $("feats").innerHTML = ""; $("feedbackBox").hidden = true; updateSaveUi(); return; }
+  if (current && current.o === o && current.s === s) return;
+  const r = LMP.score(o, s);
+  current = { o, s, r, savedId: null }; picked = 0;
+  renderVerdict(r, `<span>Not saved yet</span>`); renderFeatures(r.features);
+  $("feedbackBox").hidden = true; $("opinion").innerHTML = `<p class="hint">Claude reads the same pair and gives its own score and reason. It uses your Claude account.</p>`;
+  updateSaveUi();
+}
+function updateSaveUi() {
+  const can = !!current && (B.mode !== "artifact" || B.canWrite) && B.mode !== "pending";
+  $("saveBtn").disabled = !can || !!(current && current.savedId);
+  $("saveHint").textContent = !current ? "The verdict updates as you type; saving adds it to History."
+    : current.savedId ? "Saved to History." : (B.mode === "artifact" && !B.canWrite) ? "Saving needs Contributor access to this page." : "Not saved yet.";
+}
+async function onSave(e) {
+  e.preventDefault(); preview(); if (!current || current.savedId) return;
+  $("saveBtn").disabled = true;
+  try {
+    const out = await saveCheck(current.o, current.s, current.r);
+    current.savedId = out.id;
+    if (out.server) { current.r = Object.assign({}, current.r, out.server); renderVerdict(current.r, `<span>Scored by the server API · check #${esc(out.id)}</span>`); }
+    else renderVerdict(current.r, `<span>Saved · ${B.mode === "artifact" ? "shared history" : "this browser"}</span>`);
+    showFeedback(); toast("Saved to History");
+  } catch (err) { toast(err && err.message ? err.message : "Could not save this check"); }
+  updateSaveUi();
+}
+function showFeedback() {
+  const box = $("feedbackBox"); box.hidden = !current || !current.savedId; if (box.hidden) return;
+  $("pick").innerHTML = Array.from({ length: 10 }, (_, i) => `<button type="button" data-v="${i + 1}" aria-pressed="${picked === i + 1}">${i + 1}</button>`).join("");
+  const f = feedbackFor(current.savedId);
+  $("fbHint").textContent = f.n ? `${f.n} human score${f.n > 1 ? "s" : ""} so far, mean ${f.mean.toFixed(1)}` : "No human score yet for this check.";
+  $("fbSend").disabled = !picked;
+}
+$("pick").addEventListener("click", (e) => { const b = e.target.closest("button"); if (!b) return; picked = +b.dataset.v; showFeedback(); });
+$("fbSend").addEventListener("click", async () => {
+  if (!current || !current.savedId || !picked) return; $("fbSend").disabled = true;
+  try { await sendFeedback(current.savedId, picked, $("fbComment").value.trim()); $("fbComment").value = ""; toast("Thanks — your score is saved"); }
+  catch (err) { toast(err && err.message ? err.message : "Could not save your score"); }
+  showFeedback();
+});
+$("askClaude").addEventListener("click", async () => {
+  if (!B.sample || !current) return;
+  const btn = $("askClaude"); btn.disabled = true; $("opinion").innerHTML = `<p class="hint">Thinking…</p>`;
+  const prompt = `You are a careful legal reviewer of plain-language rewrites of Indian insurance and tenancy clauses (English or Hindi).
+Judge whether the REWRITE keeps the LEGAL meaning of the ORIGINAL: who must or may do what, under which conditions, exceptions, amounts, deadlines and parties. Ignore style.
+Score 1-10: 10 = identical legal effect; 8 = trivial detail lost; 5-7 = a secondary detail lost; 2-4 = a core condition, exception, number, date, party or duty changed; 1 = rule reversed.
+ORIGINAL: ${current.o}
+REWRITE: ${current.s}
+An automatic checker gave ${current.r.score.toFixed(1)}/10 and found: ${current.r.why}
+Answer ONLY with JSON: {"score": <integer 1-10>, "change": "<the main legal change in under 15 words, or 'none'>", "agrees_with_checker": <true|false>, "reason": "<one or two sentences in English>"}`;
+  try {
+    const j = await B.sample.json(prompt, { modelTier: "default" });
+    const sc = Math.max(1, Math.min(10, Number(j.score) || 0));
+    $("opinion").innerHTML = `<div class="score-line"><span class="score" style="font-size:34px">${sc}<small>/ 10</small></span><span class="pill ${band(sc)}">${sc >= 7.5 ? "Preserved" : sc >= 4.5 ? "Partially preserved" : "Not preserved"}</span></div>
+      <p class="verdict">${esc(j.change || "")}</p><p>${esc(j.reason || "")}</p>
+      <p class="hint">${j.agrees_with_checker ? "Claude agrees with the checker." : "Claude disagrees with the checker."} An LLM opinion, not a legal one.</p>`;
+  } catch (e) {
+    const msg = { not_granted: "Claude was not allowed for this page.", rate_limited: "Too many requests right now. Try again in a minute.", cancelled: "Stopped." }[e && e.code] || "Claude could not answer this time.";
+    $("opinion").innerHTML = `<p class="hint">${esc(msg)}</p>`;
+    if (e && e.code === "not_granted") $("opinionBox").hidden = true;
+  }
+  btn.disabled = false;
+});
+$("examples").innerHTML = EXAMPLES.map((e, i) => `<button type="button" class="chip" data-i="${i}" aria-pressed="false"><b>${e.tag}</b>${esc(e.name)}</button>`).join("");
+$("examples").addEventListener("click", (ev) => {
+  const b = ev.target.closest(".chip"); if (!b) return; const ex = EXAMPLES[+b.dataset.i];
+  orig.value = ex.o; simp.value = ex.s; document.querySelectorAll("#examples .chip").forEach((c) => c.setAttribute("aria-pressed", String(c === b))); preview();
+});
+let tm = null;
+const onInput = () => { document.querySelectorAll("#examples .chip").forEach((c) => c.setAttribute("aria-pressed", "false")); clearTimeout(tm); tm = setTimeout(preview, 200); };
+orig.addEventListener("input", onInput); simp.addEventListener("input", onInput);
+$("form").addEventListener("submit", onSave);
+$("clear").addEventListener("click", () => { orig.value = ""; simp.value = ""; preview(); orig.focus(); });
+$("onlyfired").addEventListener("change", () => current && renderFeatures(current.r.features));
+
+// ================================================================== batch room
+let batchRes = [];
+function parseRows(text) {
+  const lines = text.replace(/\r/g, "").split("\n").filter((l) => l.trim());
+  if (!lines.length) return [];
+  if (lines.some((l) => l.includes("\t"))) return lines.map((l) => l.split("\t")).filter((p) => p.length >= 2 && p[0].trim() && p[1].trim()).map((p) => [p[0].trim(), p[1].trim()]);
+  const rows = []; let row = [], cell = "", q = false;                       // RFC 4180 CSV
+  const src = lines.join("\n") + "\n";
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (q) { if (c === '"' && src[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') q = false; else cell += c; }
+    else if (c === '"') q = true; else if (c === ",") { row.push(cell); cell = ""; } else if (c === "\n") { row.push(cell); rows.push(row); row = []; cell = ""; } else cell += c;
+  }
+  const head = rows[0].map((h) => h.trim().toLowerCase());
+  const io = head.indexOf("original"), is = head.indexOf("simplification") >= 0 ? head.indexOf("simplification") : head.indexOf("rewrite");
+  const body = io >= 0 && is >= 0 ? rows.slice(1) : rows;
+  const a = io >= 0 && is >= 0 ? io : 0, b = io >= 0 && is >= 0 ? is : 1;
+  return body.filter((r) => r[a] && r[b] && r[a].trim() && r[b].trim()).map((r) => [r[a].trim(), r[b].trim()]);
+}
+async function runBatch() {
+  const pairs = parseRows($("batchIn").value).slice(0, 500);
+  if (!pairs.length) { $("batchHint").textContent = "No pairs found. Use one tab-separated pair per line, or a CSV with a header."; return; }
+  $("batchRun").disabled = true; $("batchHint").textContent = "Scoring…";
+  try {
+    if (B.mode === "api") {
+      const res = await fetch("api/batch", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pairs: pairs.map(([o, s]) => ({ original: o, simplification: s })) }) });
+      if (!res.ok) throw new Error("The server refused the batch (" + res.status + ")");
+      const j = await res.json(); batchRes = j.results.map((r, i) => ({ o: pairs[i][0], s: pairs[i][1], score: r.score, decision: r.decision, type: r.error_type, why: r.explanation }));
+    } else {
+      batchRes = pairs.map(([o, s]) => { const r = LMP.score(o, s); return { o, s, score: r.score, decision: r.decision, type: r.type, why: r.why }; });
+    }
+    renderBatch(); $("batchHint").textContent = `${batchRes.length} pairs scored${B.mode === "api" ? " by the server API" : " in your browser"}.`;
+  } catch (e) { $("batchHint").textContent = e.message || "Scoring failed."; }
+  $("batchRun").disabled = false;
+}
+function renderBatch() {
+  const n = batchRes.length, cnt = (d) => batchRes.filter((r) => r.decision === d).length;
+  $("batchKpis").hidden = $("batchOut").hidden = !n; $("batchDl").disabled = !n;
+  $("batchKpis").innerHTML = [["Pairs", n], ["Not preserved", cnt("Not preserved")], ["Partially preserved", cnt("Partially preserved")], ["Preserved", cnt("Preserved")]]
+    .map(([k, v]) => `<div class="kpi"><span class="v">${v}</span><span class="k">${k}</span></div>`).join("");
+  $("batchRows").innerHTML = batchRes.map((r, i) => `<tr><td class="num">${i + 1}</td><td class="clip"><span>${esc(r.o)}</span></td><td class="clip"><span>${esc(r.s)}</span></td><td class="num">${r.score.toFixed(1)}</td><td><span class="pill ${band(r.score)}">${esc(r.decision)}</span></td><td>${esc(TYPE_LABEL[r.type] || r.type)}</td></tr>`).join("");
+}
+const csvCell = (v) => '"' + String(v).replace(/"/g, '""') + '"';
+$("batchRun").addEventListener("click", runBatch);
+$("batchSample").addEventListener("click", () => { $("batchIn").value = EXAMPLES.map((e) => e.o + "\t" + e.s).join("\n"); runBatch(); });
+$("batchFile").addEventListener("change", (e) => { const f = e.target.files[0]; if (!f) return; const rd = new FileReader(); rd.onload = () => { $("batchIn").value = String(rd.result); runBatch(); }; rd.readAsText(f); e.target.value = ""; });
+$("batchDl").addEventListener("click", () => saveFile("lmp-batch-results.csv",
+  ["original,simplification,score,decision,error_type,explanation"].concat(batchRes.map((r) => [r.o, r.s, r.score.toFixed(2), r.decision, r.type, r.why].map(csvCell).join(","))).join("\n")));
+
+// ================================================================== history room
+let histFilter = "all";
+$("histFilter").innerHTML = [["all", "All"], ["Not preserved", "Not"], ["Partially preserved", "Partial"], ["Preserved", "Preserved"]]
+  .map(([v, t]) => `<button type="button" class="chip" data-v="${v}" aria-pressed="${v === "all"}">${t}</button>`).join("");
+$("histFilter").addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (!b) return; histFilter = b.dataset.v; document.querySelectorAll("#histFilter .chip").forEach((c) => c.setAttribute("aria-pressed", String(c === b))); renderHistory(); });
+$("histQ").addEventListener("input", () => renderHistory());
+async function renderHistory() {
+  $("nHist").textContent = B.history.length ? String(B.history.length) : "";
+  $("histNote").textContent = { artifact: "Shared with everyone who has this page. Newest first.", api: "Stored by the server API (SQLite). Newest first.", local: "Kept in this browser only. Newest first.", pending: "" }[B.mode] || "";
+  const q = $("histQ").value.trim().toLowerCase();
+  const rows = B.history.filter((h) => (histFilter === "all" || h.decision === histFilter) && (!q || (h.o + " " + h.s).toLowerCase().includes(q)));
+  let names = {};
+  if (B.mode === "artifact" && B.user) { const ids = [...new Set(rows.map((h) => h.by).filter(Boolean))]; if (ids.length) names = await B.user.profiles(ids); }
+  $("histRows").innerHTML = rows.length ? rows.map((h) => {
+    const f = feedbackFor(h.id); const who = B.mode === "artifact" ? (h.by && names[h.by] ? (names[h.by].name || "Someone") : "Someone") : B.mode === "api" ? "API" : "You";
+    return `<tr class="click" data-id="${esc(h.id)}"><td style="white-space:nowrap">${ago(h.at)}</td><td class="clip"><span>${esc(h.o)} → ${esc(h.s)}</span></td><td class="num">${h.score.toFixed(1)}</td><td><span class="pill ${band(h.score)}">${esc(h.decision)}</span></td><td>${esc(TYPE_LABEL[h.type] || h.type)}</td><td class="num">${f.n ? f.n + " · mean " + f.mean.toFixed(1) : "—"}</td><td>${esc(who)}</td></tr>`;
+  }).join("") : `<tr><td colspan="7" class="empty">${B.history.length ? "No saved checks match." : "No saved checks yet. Check a pair and press “Check and save”."}</td></tr>`;
+}
+$("histRows").addEventListener("click", (e) => {
+  const tr = e.target.closest("tr[data-id]"); if (!tr) return; const h = B.history.find((x) => x.id === tr.dataset.id); if (!h) return;
+  orig.value = h.o; simp.value = h.s; current = null; preview(); current.savedId = h.id;
+  renderVerdict(current.r, `<span>From History · ${ago(h.at)}</span>`); showFeedback(); updateSaveUi(); showTab("check");
+});
+
+// ================================================================== dashboard room
+function dashData() {
+  const H = B.history, n = H.length, by = (k) => H.reduce((m, h) => (m[h[k]] = (m[h[k]] || 0) + 1, m), {});
+  const pairs = [];
+  if (B.mode === "api") H.forEach((h) => { if (h.nFb) pairs.push([h.score, h.humanMean]); });
+  else B.feedback.forEach((f) => { const h = H.find((x) => x.id === f.checkId); if (h) pairs.push([h.score, f.human]); });
+  return { n, byDecision: by("decision"), byType: by("type"), byLang: by("lang"), mean: n ? H.reduce((a, h) => a + h.score, 0) / n : null, pairs };
+}
+function pearson(p) {
+  if (p.length < 3) return null; const mx = p.reduce((a, x) => a + x[0], 0) / p.length, my = p.reduce((a, x) => a + x[1], 0) / p.length;
+  let sxy = 0, sx = 0, sy = 0; p.forEach(([x, y]) => { sxy += (x - mx) * (y - my); sx += (x - mx) ** 2; sy += (y - my) ** 2; });
+  return sx && sy ? sxy / Math.sqrt(sx * sy) : null;
+}
+function renderDashboard() {
+  const d = dashData(), pct = (k) => (d.n ? Math.round(100 * (d.byDecision[k] || 0) / d.n) + "%" : "—");
+  $("dashKpis").innerHTML = [["Saved checks", d.n], ["Not preserved", pct("Not preserved")], ["Average score", d.mean == null ? "—" : d.mean.toFixed(1)],
+    ["Hindi / English", `${d.byLang.hi || 0} / ${d.byLang.en || 0}`], ["Human scores", d.pairs.length]].map(([k, v]) => `<div class="kpi"><span class="v">${v}</span><span class="k">${k}</span></div>`).join("");
+  const types = Object.entries(d.byType).sort((a, b) => b[1] - a[1]);
+  if (!types.length) $("dashTypes").innerHTML = `<p class="empty">Saved checks will appear here.</p>`;
+  else {
+    const max = types[0][1], rh = 30, H = types.length * rh + 10;
+    $("dashTypes").innerHTML = `<svg viewBox="0 0 560 ${H}" role="img" aria-label="Changes found in saved checks">${types.map(([t, c], i) => {
+      const w = Math.max(2, (c / max) * 300), y = i * rh + 4;
+      return `<text x="196" y="${y + 17}" text-anchor="end" font-size="13" fill="var(--ink)">${esc(TYPE_LABEL[t] || t)}</text><rect x="206" y="${y + 4}" width="${w}" height="18" rx="3" fill="${t === "NONE" ? "var(--ok)" : "var(--bar)"}"><title>${esc(TYPE_LABEL[t] || t)}: ${c}</title></rect><text x="${212 + w}" y="${y + 17}" font-size="12.5" fill="var(--muted)" font-family="var(--f-mono)">${c}</text>`;
+    }).join("")}</svg>`;
+  }
+  const p = d.pairs, dec = (s) => (s >= 7.5 ? 2 : s >= 4.5 ? 1 : 0);
+  const r = pearson(p), mae = p.length ? p.reduce((a, [x, y]) => a + Math.abs(x - y), 0) / p.length : null, agree = p.length ? p.filter(([x, y]) => dec(x) === dec(y)).length / p.length : null;
+  $("dashHuman").innerHTML = [["Human scores collected", p.length], ["Average gap, model vs human (points)", mae == null ? "—" : mae.toFixed(2)],
+    ["Same decision as the human", agree == null ? "—" : Math.round(100 * agree) + "%"], ["Correlation (Pearson r, needs 3+)", r == null ? "—" : r.toFixed(2)]]
+    .map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+  $("cvStats").innerHTML = [["Agreement with labels (Pearson r)", CV.r], ["English / Hindi", CV.r_lang], ["Average error, 1–10 scale (RMSE)", CV.rmse],
+    ["“Not preserved” detection (F1)", CV.npf1], ["Zero-shot on human-scored French", CV.fr], ["Legal-error detection (F1)", CV.det],
+    ["Identical / unrelated pairs (ideal 10 / 1)", CV.sanity], ["Best generic metric (chrF), for comparison", CV.chrf]].map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+}
+
+// ================================================================== api room
+function renderApi() {
+  const base = B.mode === "api" ? location.origin + location.pathname.replace(/\/$/, "") : "https://YOUR-HOST";
+  $("apiBaseNote").textContent = B.mode === "api" ? `This page is served by the API at ${base}. Interactive docs: ${base}/docs`
+    : B.mode === "artifact" ? "This page runs on claude.ai with the model in your browser and a shared database for history and human scores. The same app, served by the FastAPI backend, uses the server for every call."
+    : "This copy runs without a server: the model runs in your browser and history stays on this device.";
+  $("curl").textContent = `curl -X POST ${base}/api/score \\
+  -H "Content-Type: application/json" \\
+  -d '{"original": "The tenant shall not keep pets without the written permission of the landlord.",
+       "simplification": "The tenant can keep pets."}'
+
+# → {"id": 1, "score": 2.9, "decision": "Not preserved", "error_type": "NEGATION",
+#    "explanation": "Polarity changed: negation removed in the simplification, reversing the rule.", ...}
+
+curl -F "file=@pairs.csv" ${base}/api/batch/csv > scored.csv`;
+}
+
+// ================================================================== tabs + data flow
+function showTab(name) {
+  document.querySelectorAll("nav.tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
+  document.querySelectorAll("[data-room]").forEach((s) => { s.hidden = s.dataset.room !== name; });
+  if (name === "history") renderHistory(); if (name === "dashboard") renderDashboard(); if (name === "api") renderApi();
+  try { localStorage.setItem("lmc.tab", name); } catch { /* ignore */ }
+}
+document.querySelector("nav.tabs").addEventListener("click", (e) => { const b = e.target.closest("button[data-tab]"); if (b) showTab(b.dataset.tab); });
+function onData() {
+  $("nHist").textContent = B.history.length ? String(B.history.length) : "";
+  const room = document.querySelector("[data-room]:not([hidden])")?.dataset.room;
+  if (room === "history") renderHistory(); if (room === "dashboard") renderDashboard();
+  if (current && current.savedId) showFeedback();
+}
+
+// first frame: a loaded example, scored in the browser
+orig.value = EXAMPLES[0].o; simp.value = EXAMPLES[0].s; document.querySelector('#examples .chip[data-i="0"]').setAttribute("aria-pressed", "true");
+preview();
+let startTab = "check"; try { startTab = localStorage.getItem("lmc.tab") || "check"; } catch { /* ignore */ }
+showTab(["check", "batch", "history", "dashboard", "api"].includes(startTab) ? startTab : "check");
+startBackend();
+</script>
