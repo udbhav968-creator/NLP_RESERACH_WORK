@@ -32,6 +32,13 @@ uvicorn api.main:app --port 8000      # web app at http://localhost:8000, API do
 Results on 640 pairs (5-fold grouped CV): Pearson r 0.48 vs 0.17 for chrF; Not-preserved F1 0.75; error-detection F1 0.87;
 zero-shot r 0.52 on human-labelled FrJUDGE.
 
+## Full training (Google Colab, GPU)
+
+Open `Colab_Full_Training.ipynb` in Colab (Runtime → T4 GPU → Run all), or run `python scripts/train_all.py` on any machine.
+It runs E1–E5 (all baselines and models), fine-tunes XLM-R, MuRIL and mBERT with LegalDiff fusion, rebuilds the deployed
+model and web app, and writes one comparison table to `results/ALL_RESULTS.md` (about 60–80 min on a T4).
+`--quick` is a 10-minute smoke test that leaves `results/` untouched; `--resume` skips steps already finished after a disconnect.
+
 ## Deliverables (in `deliverables/`)
 
 | File | What it is |

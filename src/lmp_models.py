@@ -115,6 +115,13 @@ class WordLlamaTokenizer:
     def token_to_id(self, t): return {"[CLS]": 1, "[SEP]": 2}[t]
     def get_vocab_size(self): return self.E.shape[0]
 
+def _device():
+    """GPU when available (Colab), unless LMP_DEVICE=cpu. CPU results are bit-for-bit reproducible; GPU runs can differ slightly."""
+    import os
+    want = os.environ.get("LMP_DEVICE", "auto")
+    return torch.device("cuda" if want != "cpu" and torch.cuda.is_available() else "cpu")
+
+
 class MLJudgeBERT:
     """Wrapper: training with JUDGEBERT-style data augmentation (identical -> 10, unrelated -> 1)."""
     def __init__(self, use_features=False, epochs=40, lr=5e-4, seed=0, data_augmentation=True, vocab_size=3000, embed="wordllama", max_len=320):
@@ -136,21 +143,23 @@ class MLJudgeBERT:
         F_ = None
         if self.use_features:
             Xf = self._feats(pairs); self.mu, self.sd = Xf.mean(0), Xf.std(0) + 1e-6; F_ = (Xf - self.mu) / self.sd
+        self.dev = _device()
         self.model = CrossEncoder(self.tok.get_vocab_size(), d=d, ff=2 * d, max_len=self.max_len, n_feat=len(FEATURE_NAMES) if self.use_features else 0)
         if self.embed == "wordllama":
             E = torch.tensor(self.tok.E); E = E / E.norm(dim=1, keepdim=True).clamp(min=1e-6)
             self.model.tok.weight.data.copy_(E)
+        self.model.to(self.dev)
         opt = torch.optim.AdamW(self.model.parameters(), lr=self.lr, weight_decay=0.01)
         n = len(pairs); bs = 16; steps = self.epochs * math.ceil(n / bs)
         sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=self.lr, total_steps=steps, pct_start=0.1)
-        yt = torch.tensor(y)
+        yt = torch.tensor(y, device=self.dev)
         self.model.train()
         for ep in range(self.epochs):
             perm = np.random.permutation(n)
             for i in range(0, n, bs):
                 idx = perm[i:i + bs]
-                ids, seg, mask, f = batchify([enc[j] for j in idx], F_[idx] if F_ is not None else None)
-                loss = F.mse_loss(self.model(ids, seg, mask, f), yt[idx])
+                ids, seg, mask, f = (t.to(self.dev) if t is not None else None for t in batchify([enc[j] for j in idx], F_[idx] if F_ is not None else None))
+                loss = F.mse_loss(self.model(ids, seg, mask, f), yt[torch.as_tensor(idx, device=self.dev)])
                 opt.zero_grad(); loss.backward(); nn.utils.clip_grad_norm_(self.model.parameters(), 1.0); opt.step(); sched.step()
         return self
     @torch.no_grad()
@@ -161,8 +170,8 @@ class MLJudgeBERT:
         if self.use_features:
             F_ = (self._feats(pairs) - self.mu) / self.sd
         for i in range(0, len(pairs), 64):
-            ids, seg, mask, f = batchify([encode(self.tok, o, s, self.max_len) for o, s in pairs[i:i + 64]], F_[i:i + 64] if F_ is not None else None)
-            out.extend(self.model(ids, seg, mask, f).tolist())
+            ids, seg, mask, f = (t.to(self.dev) if t is not None else None for t in batchify([encode(self.tok, o, s, self.max_len) for o, s in pairs[i:i + 64]], F_[i:i + 64] if F_ is not None else None))
+            out.extend(self.model(ids, seg, mask, f).cpu().tolist())
         return np.array(out)
 
 def augment(pairs, y, seed):

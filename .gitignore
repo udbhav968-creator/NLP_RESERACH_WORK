@@ -7,3 +7,4 @@ venv/
 api/data/
 api/model.joblib
 web/tests.json
+results/logs/train_all_state.json
