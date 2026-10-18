@@ -1,0 +1,15 @@
+fold 0: train=512 test=128
+   LegalDiff-GBR seed=0 (1s)
+   LegalDiff-GBR seed=1 (1s)
+   LegalDiff-GBR seed=2 (1s)
+
+
+
+   ML-JudgeBERT seed=0 (25s)
+
+
+
+   ML-JudgeBERT seed=1 (17s)
+
+
+
