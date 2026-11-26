@@ -28,7 +28,9 @@
 | 📊 **Annotation Agreement Report** | Krippendorff's $\alpha = 0.966$, confusion matrices | [annotation/agreement.json](annotation/agreement.json) |
 | ⚖️ **Double-Annotated Gold Dataset** | 640 human-annotated English-Hindi clauses | [data/enhi_lmp_human.jsonl](data/enhi_lmp_human.jsonl) |
 | 📚 **Extended Real Contract Dataset** | 683 real pairs (CUAD, ToS;DR, MTA 2021) | [data/enhi_lmp_extended_real.jsonl](data/enhi_lmp_extended_real.jsonl) |
-| 📘 **Comprehensive Project Report (PDF)** | Full academic mini-project report for CSET 346 | [deliverables/NLP_Mini_Project_Report.pdf](deliverables/NLP_Mini_Project_Report.pdf) |
+| 📘 **Complete Project Documentation (DOCX)** | Full, exhaustive project report with all chapters, formulas, and tables | [deliverables/EnHi_LMP_Complete_Project_Documentation.docx](deliverables/EnHi_LMP_Complete_Project_Documentation.docx) |
+| 📘 **University Mini Project Report (PDF)** | Formatted academic mini-project report for CSET 346 | [deliverables/NLP_Mini_Project_Report.pdf](deliverables/NLP_Mini_Project_Report.pdf) |
+| 📑 **University Mini Project Report (DOCX)** | Editable template report updated with 683 real pairs & alpha=0.966 | [deliverables/NLP_Mini_Project_Report.docx](deliverables/NLP_Mini_Project_Report.docx) |
 | 📑 **IEEE Research Paper (PDF)** | Full conference-format paper with experimental proofs | [deliverables/LMP_IEEE_Paper.pdf](deliverables/LMP_IEEE_Paper.pdf) |
 | 🎯 **Milestone Defense Slides** | Ready-to-present PowerPoint presentation | [deliverables/LMP_Milestone1.pptx](deliverables/LMP_Milestone1.pptx) |
 | 🛡️ **Defense & Q&A Guide** | Comprehensive defense questions and technical rationale | [deliverables/Slide_Explanation_Guide.pdf](deliverables/Slide_Explanation_Guide.pdf) |
