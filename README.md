@@ -28,6 +28,7 @@
 | 📊 **Annotation Agreement Report** | Krippendorff's $\alpha = 0.966$, confusion matrices | [annotation/agreement.json](annotation/agreement.json) |
 | ⚖️ **Double-Annotated Gold Dataset** | 640 human-annotated English-Hindi clauses | [data/enhi_lmp_human.jsonl](data/enhi_lmp_human.jsonl) |
 | 📚 **Extended Real Contract Dataset** | 683 real pairs (CUAD, ToS;DR, MTA 2021) | [data/enhi_lmp_extended_real.jsonl](data/enhi_lmp_extended_real.jsonl) |
+| 📁 **Team Word Documents Folder** | All editable Word (.docx) deliverables collected in one folder | [team_docx/](team_docx/) |
 | 📘 **Complete Project Documentation (DOCX)** | Full, exhaustive project report with all chapters, formulas, and tables | [deliverables/EnHi_LMP_Complete_Project_Documentation.docx](deliverables/EnHi_LMP_Complete_Project_Documentation.docx) |
 | 📘 **University Mini Project Report (PDF)** | Formatted academic mini-project report for CSET 346 | [deliverables/NLP_Mini_Project_Report.pdf](deliverables/NLP_Mini_Project_Report.pdf) |
 | 📑 **University Mini Project Report (DOCX)** | Editable template report updated with 683 real pairs & alpha=0.966 | [deliverables/NLP_Mini_Project_Report.docx](deliverables/NLP_Mini_Project_Report.docx) |
