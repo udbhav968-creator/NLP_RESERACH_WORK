@@ -32,6 +32,28 @@ For any pair of original and simplified legal clauses, the system predicts:
 
 ---
 
+## 🔗 Quick Reference & Live Links
+
+| Resource / System | Description | URL / Direct Link |
+|---|---|---|
+| 🌐 **Live Web Application** | Serverless in-browser & API-connected checker | [https://nlp-research-work.vercel.app](https://nlp-research-work.vercel.app) |
+| ⚡ **FastAPI Backend (Render)** | Cloud-hosted Docker API service | [https://legal-meaning-checker.onrender.com](https://legal-meaning-checker.onrender.com) |
+| 📖 **Interactive API Docs (Swagger)** | OpenAPI documentation & interactive runner | [https://legal-meaning-checker.onrender.com/docs](https://legal-meaning-checker.onrender.com/docs) |
+| 📑 **API Documentation (ReDoc)** | Clean technical REST specifications | [https://legal-meaning-checker.onrender.com/redoc](https://legal-meaning-checker.onrender.com/redoc) |
+| 🩺 **Backend Health & Model Card** | Real-time model status and metadata (`n_train: 683`) | [https://legal-meaning-checker.onrender.com/api/health](https://legal-meaning-checker.onrender.com/api/health) |
+| 📄 **Faculty Dataset & Training Report** | Corpus provenance, CUAD/ToS;DR/MTA details, and deep training | [DATASET_AND_TRAINING_REPORT.md](DATASET_AND_TRAINING_REPORT.md) |
+| 📊 **Annotation Agreement Report** | Krippendorff's $\alpha = 0.966$, confusion matrices | [annotation/agreement.json](annotation/agreement.json) |
+| ⚖️ **Double-Annotated Gold Dataset** | 640 human-annotated English-Hindi clauses | [data/enhi_lmp_human.jsonl](data/enhi_lmp_human.jsonl) |
+| 📚 **Extended Real Contract Dataset** | 683 real pairs (CUAD, ToS;DR, MTA 2021) | [data/enhi_lmp_extended_real.jsonl](data/enhi_lmp_extended_real.jsonl) |
+| 📘 **Comprehensive Project Report (PDF)** | Full academic mini-project report for CSET 346 | [deliverables/NLP_Mini_Project_Report.pdf](deliverables/NLP_Mini_Project_Report.pdf) |
+| 📑 **IEEE Research Paper (PDF)** | Full conference-format paper with experimental proofs | [deliverables/LMP_IEEE_Paper.pdf](deliverables/LMP_IEEE_Paper.pdf) |
+| 🎯 **Milestone Defense Slides** | Ready-to-present PowerPoint presentation | [deliverables/LMP_Milestone1.pptx](deliverables/LMP_Milestone1.pptx) |
+| 🛡️ **Defense & Q&A Guide** | Comprehensive defense questions and technical rationale | [deliverables/Slide_Explanation_Guide.pdf](deliverables/Slide_Explanation_Guide.pdf) |
+| 🔬 **Research Gaps & Enhancements (PDF)** | In-depth breakdown of all 5 JUDGEBERT gaps | [deliverables/Research_Gaps_and_Enhancements.pdf](deliverables/Research_Gaps_and_Enhancements.pdf) |
+| 📦 **GitHub Repository** | Complete open-source code and reproducible pipeline | [github.com/udbhav968-creator/NLP_RESERACH_WORK](https://github.com/udbhav968-creator/NLP_RESERACH_WORK) |
+
+---
+
 ## 2. Research Gaps in JUDGEBERT & How This Project Fills Them
 
 The reference paper (*Beauchemin et al., EMNLP 2025*) introduced LMP as a domain-specific evaluation problem and identified 5 major open research gaps. Our project resolves each gap with empirical rigor:
@@ -269,9 +291,10 @@ curl -X POST https://legal-meaning-checker.onrender.com/api/batch/csv \
 │   ├── sanity_unrelated.jsonl       # 160 contrastive unrelated pairs
 │   └── real_contracts_lmp.jsonl     # Ingested pairs from CUAD, ToS;DR, and model leases
 ├── deliverables/
+│   ├── NLP_Mini_Project_Report.pdf  # Comprehensive CSET 346 Course Project Report
+│   ├── LMP_IEEE_Paper.pdf           # Full IEEE-format conference paper
 │   ├── LMP_Milestone1.pptx          # Ready-to-present Milestone 1 PowerPoint slides
 │   ├── Slide_Explanation_Guide.pdf  # Comprehensive defense guide & Q&A preparation
-│   ├── LMP_IEEE_Paper.pdf           # Full IEEE-format conference paper
 │   └── Research_Gaps_and_Enhancements.pdf # Detailed gap-by-gap analysis document
 ├── results/
 │   ├── exp1_summary.json            # 5-fold cross-validation metrics on 640 human pairs
