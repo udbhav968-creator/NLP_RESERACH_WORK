@@ -1,0 +1,14 @@
+.git
+.venv
+venv
+results
+deliverables
+paper
+annotation
+api
+src
+data
+deploy
+*.joblib
+*.sqlite3
+*.zip
