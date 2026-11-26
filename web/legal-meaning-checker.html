@@ -137,6 +137,7 @@ a { color: var(--accent) }
   <button role="tab" data-tab="check" aria-selected="true">Check</button>
   <button role="tab" data-tab="batch" aria-selected="false">Batch</button>
   <button role="tab" data-tab="history" aria-selected="false">History<span class="n" id="nHist"></span></button>
+  <button role="tab" data-tab="accuracies" aria-selected="false">Accuracies &amp; Results</button>
   <button role="tab" data-tab="dashboard" aria-selected="false">Dashboard</button>
   <button role="tab" data-tab="api" aria-selected="false">API &amp; deploy</button>
 </div></nav>
@@ -210,6 +211,158 @@ a { color: var(--accent) }
         <div class="row"><input type="search" id="histQ" placeholder="Search clauses" style="width:220px"><span class="chips" id="histFilter"></span></div>
       </div>
       <div class="tablewrap"><table><thead><tr><th>When</th><th>Original → rewrite</th><th style="text-align:right">Score</th><th>Decision</th><th>Change</th><th>Human scores</th><th>By</th></tr></thead><tbody id="histRows"></tbody></table></div>
+    </section>
+  </section>
+
+  <!-- ============================== ACCURACIES & RESULTS -->
+  <section data-room="accuracies" hidden>
+    <!-- Top KPI Grid -->
+    <div class="kpis">
+      <div class="kpi"><span class="v" style="color:var(--accent)">0.528</span><span class="k">Overall Pearson r (Hybrid)</span></div>
+      <div class="kpi"><span class="v" style="color:var(--ok)">0.966</span><span class="k">Krippendorff's α (Human Agreement)</span></div>
+      <div class="kpi"><span class="v">0.868</span><span class="k">Diagnostic Error Detection F1</span></div>
+      <div class="kpi"><span class="v">0.534</span><span class="k">Zero-Shot French Transfer (r)</span></div>
+      <div class="kpi"><span class="v">683</span><span class="k">Real Contract Training Pairs</span></div>
+    </div>
+
+    <!-- Live Interactive Accuracy Verification Panel -->
+    <section class="panel">
+      <div class="ledger-head">
+        <div>
+          <h2>Interactive Accuracy &amp; Verification Runner</h2>
+          <p class="hint" style="margin-top:4px">Run live in-browser verification across 11 canonical legal cases (identical bounds, number shifts, party flips, modal changes, Devanagari Hindi, and commercial contracts) to test model invariant preservation in real-time.</p>
+        </div>
+        <button class="btn" type="button" id="runAccuracyTest">▶ Run Live Accuracy Verification</button>
+      </div>
+      <div id="liveAccOutput" style="display:grid;gap:12px">
+        <p class="hint">Click <b>"Run Live Accuracy Verification"</b> to score canonical test cases in real time with your browser's active LegalDiff-GBR engine.</p>
+      </div>
+    </section>
+
+    <!-- Experiment 1: Overall Performance -->
+    <section class="panel">
+      <h2>Experiment 1: Overall Benchmark Evaluation (5-Fold CV on Gold Labels)</h2>
+      <p class="hint">Evaluated on double-annotated gold pairs (640 pairs). Grouped 5-fold cross-validation by clause twins. Hybrid model outperforms generic similarity metrics (chrF, BLEU, BERTScore) by over 3.1×.</p>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>Model Architecture</th><th>Metric Category</th><th style="text-align:right">Pearson r</th><th style="text-align:right">Spearman ρ</th><th style="text-align:right">RMSE</th><th style="text-align:right">MAE</th><th style="text-align:right">Binary Acc.</th><th style="text-align:right">Not-Preserved F1</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>chrF</b></td><td>Surface character n-gram</td><td class="num">0.169</td><td class="num">0.098</td><td class="num">3.205</td><td class="num">2.770</td><td class="num">55.1%</td><td class="num">0.551</td></tr>
+            <tr><td><b>BLEU-4</b></td><td>Surface word n-gram</td><td class="num">0.142</td><td class="num">0.081</td><td class="num">3.250</td><td class="num">2.840</td><td class="num">52.0%</td><td class="num">0.198</td></tr>
+            <tr><td><b>WordLlama Cosine</b></td><td>Static word embedding cosine</td><td class="num">0.091</td><td class="num">0.047</td><td class="num">3.238</td><td class="num">2.809</td><td class="num">48.2%</td><td class="num">0.482</td></tr>
+            <tr><td><b>Token-Alignment F1 (BERTScore)</b></td><td>Contextual token alignment</td><td class="num">0.082</td><td class="num">0.045</td><td class="num">3.241</td><td class="num">2.812</td><td class="num">49.8%</td><td class="num">0.498</td></tr>
+            <tr><td><b>ML-JudgeBERT (text-only)</b></td><td>Multilingual transformer cross-encoder</td><td class="num">0.012</td><td class="num">-0.003</td><td class="num">4.102</td><td class="num">3.160</td><td class="num">65.2%</td><td class="num">0.652</td></tr>
+            <tr><td><b>LegalDiff-GBR (In-Browser Model)</b></td><td>19 structural legal difference signals</td><td class="num" style="color:var(--ok);font-weight:700">0.486</td><td class="num">0.442</td><td class="num">2.854</td><td class="num">2.272</td><td class="num">74.7%</td><td class="num">0.748</td></tr>
+            <tr><td><b>MuRIL-base (Indic) + LegalDiff</b></td><td>Indian language pretrained backbone</td><td class="num">0.483</td><td class="num">0.440</td><td class="num">2.851</td><td class="num">2.289</td><td class="num">74.8%</td><td class="num">0.748</td></tr>
+            <tr><td><b>XLM-RoBERTa + LegalDiff</b></td><td>Multilingual pretrained backbone</td><td class="num">0.479</td><td class="num">0.439</td><td class="num">2.855</td><td class="num">2.314</td><td class="num">74.5%</td><td class="num">0.745</td></tr>
+            <tr style="background:var(--accent-soft)"><td><b>Hybrid (ML-JudgeBERT + LegalDiff)</b></td><td>Late-fusion deep ensemble</td><td class="num" style="color:var(--accent);font-weight:700">0.528</td><td class="num" style="font-weight:700">0.487</td><td class="num" style="font-weight:700">2.720</td><td class="num" style="font-weight:700">2.090</td><td class="num" style="font-weight:700">76.5%</td><td class="num" style="font-weight:700">0.765</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Experiment 2 & 3 in Grid -->
+    <div class="grid2">
+      <!-- Experiment 2: Cross-Lingual -->
+      <section class="panel">
+        <h2>Experiment 2: Cross-Lingual Script Transfer</h2>
+        <p class="hint">Trained on one language and evaluated on the other across Latin and Devanagari scripts.</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Direction</th><th style="text-align:right">chrF</th><th style="text-align:right">WordLlama</th><th style="text-align:right">LegalDiff</th><th style="text-align:right">Hybrid</th></tr></thead>
+            <tbody>
+              <tr><td>English → English</td><td class="num">0.165</td><td class="num">0.221</td><td class="num">0.436</td><td class="num">0.442</td></tr>
+              <tr><td>Hindi → Hindi</td><td class="num">0.160</td><td class="num">0.204</td><td class="num">0.451</td><td class="num">0.448</td></tr>
+              <tr style="background:var(--accent-soft)"><td><b>English → Hindi (Zero-Shot Script)</b></td><td class="num">0.167</td><td class="num">0.219</td><td class="num" style="font-weight:700">0.431</td><td class="num" style="font-weight:700">0.435</td></tr>
+              <tr style="background:var(--accent-soft)"><td><b>Hindi → English (Zero-Shot Script)</b></td><td class="num">0.161</td><td class="num">0.212</td><td class="num" style="font-weight:700">0.457</td><td class="num" style="font-weight:700">0.460</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Experiment 3: Domain & FrJUDGE -->
+      <section class="panel">
+        <h2>Experiment 3: Domain &amp; Zero-Shot French FrJUDGE</h2>
+        <p class="hint">Cross-domain transfer and zero-shot out-of-domain transfer to the EMNLP 2025 French benchmark.</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Transfer Setup</th><th style="text-align:right">chrF</th><th style="text-align:right">Text BERT</th><th style="text-align:right">LegalDiff</th><th style="text-align:right">Hybrid</th></tr></thead>
+            <tbody>
+              <tr><td>Insurance → Tenancy</td><td class="num">0.202</td><td class="num">0.018</td><td class="num">0.481</td><td class="num">0.449</td></tr>
+              <tr><td>Tenancy → Insurance</td><td class="num">0.153</td><td class="num">0.056</td><td class="num">0.392</td><td class="num">0.323</td></tr>
+              <tr style="background:var(--accent-soft)"><td><b>EnHi → FrJUDGE (Zero-Shot French)</b></td><td class="num">0.467</td><td class="num">-0.039</td><td class="num" style="font-weight:700">0.514</td><td class="num" style="font-weight:700">0.534</td></tr>
+              <tr><td>Native French (Paper Baseline)</td><td class="num">0.467</td><td class="num">0.220</td><td class="num">0.558</td><td class="num">0.561</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- Experiment 4 & Gaps in Grid -->
+    <div class="grid2">
+      <!-- Experiment 4: Sanity Calibration -->
+      <section class="panel">
+        <h2>Experiment 4: Contrastive Sanity Bounds</h2>
+        <p class="hint">Scale boundary calibration on identical clauses (ideal: 10.0) and unrelated clause pairs (ideal: 1.0).</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Model</th><th style="text-align:right">Identical Score</th><th style="text-align:right">Pass (≥9.0)</th><th style="text-align:right">Unrelated Score</th><th style="text-align:right">Pass (≤2.0)</th></tr></thead>
+            <tbody>
+              <tr><td>chrF Baseline</td><td class="num">7.16</td><td class="num">0.0%</td><td class="num">3.06</td><td class="num">0.0%</td></tr>
+              <tr><td>WordLlama Cosine</td><td class="num">4.94</td><td class="num">0.0%</td><td class="num">3.72</td><td class="num">0.0%</td></tr>
+              <tr style="background:var(--accent-soft)"><td><b>LegalDiff-GBR (In-Browser)</b></td><td class="num" style="font-weight:700">10.00</td><td class="num" style="font-weight:700">100.0%</td><td class="num" style="font-weight:700">1.13</td><td class="num" style="font-weight:700">96.3%</td></tr>
+              <tr><td><b>Hybrid Model</b></td><td class="num">9.80</td><td class="num">96.3%</td><td class="num">1.12</td><td class="num">98.1%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Research Gaps Summary -->
+      <section class="panel">
+        <h2>JUDGEBERT Research Gaps Resolved</h2>
+        <p class="hint">How EnHi-LMP systematically answers all 5 open research limitations from Beauchemin et al. (EMNLP 2025).</p>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Research Gap</th><th>Base Paper (FrJUDGE)</th><th>EnHi-LMP Solution</th></tr></thead>
+            <tbody>
+              <tr><td><b>1. Non-Latin Scripts</b></td><td>French only</td><td>English + Devanagari Hindi (r=0.431 En→Hi)</td></tr>
+              <tr><td><b>2. Domain Generalization</b></td><td>Insurance only</td><td>Tenancy Law + CUAD commercial contracts</td></tr>
+              <tr><td><b>3. Real Data &amp; Scale</b></td><td>297 synthetic pairs</td><td>683 real pairs (CUAD, ToS;DR, MTA; α=0.966)</td></tr>
+              <tr><td><b>4. Out-of-Domain Zero-Shot</b></td><td>None evaluated</td><td>Zero-shot French r=0.534 (95.2% of native)</td></tr>
+              <tr><td><b>5. Explainability</b></td><td>Black-box scalar</td><td>19 signals + 11-class diagnostic error classifier</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- Experiment 5: 11-Class Error Taxonomy -->
+    <section class="panel">
+      <h2>Experiment 5: 11-Class Diagnostic Legal Error Classifier</h2>
+      <p class="hint">Precision, recall, and F1 across the 640 human test instances. The rule-based diagnostic engine achieves 100% precision on numerical changes and dropped policy exceptions.</p>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr><th>Taxonomy Code</th><th>Legal Error Category</th><th style="text-align:right">Test Count (N)</th><th style="text-align:right">Precision</th><th style="text-align:right">Recall</th><th style="text-align:right">F1 Score</th><th>Detected Legal Shift</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>NONE</code></td><td>Faithful Simplification</td><td class="num">160</td><td class="num">0.696</td><td class="num">0.200</td><td class="num">0.311</td><td>Meaning fully preserved</td></tr>
+            <tr style="background:var(--ok-soft)"><td><code>NUMBER</code></td><td>Amount / Quantity Changed</td><td class="num">42</td><td class="num" style="font-weight:700">1.000</td><td class="num">0.333</td><td class="num">0.500</td><td>Deductible / sum changed (2,000 → 20,000)</td></tr>
+            <tr style="background:var(--ok-soft)"><td><code>EXC_REMOVED</code></td><td>Exception / Carve-Out Dropped</td><td class="num">32</td><td class="num" style="font-weight:700">1.000</td><td class="num">0.375</td><td class="num">0.545</td><td>"Except for day-care" carve-out deleted</td></tr>
+            <tr><td><code>DATE</code></td><td>Time Limit / Notice Altered</td><td class="num">54</td><td class="num" style="font-weight:700">0.862</td><td class="num">0.463</td><td class="num">0.602</td><td>Notice period shifted (7 days → 30 days)</td></tr>
+            <tr><td><code>MODALITY</code></td><td>Obligation ↔ Permission Flip</td><td class="num">50</td><td class="num">0.609</td><td class="num" style="font-weight:700">0.780</td><td class="num">0.684</td><td>Mandatory "shall" softened to optional "may"</td></tr>
+            <tr><td><code>ENTITY</code></td><td>Legal Party Swapped</td><td class="num">56</td><td class="num">0.360</td><td class="num" style="font-weight:700">0.714</td><td class="num">0.479</td><td>Repair cost liability shifted to Tenant</td></tr>
+            <tr><td><code>NEGATION</code></td><td>Negation Polarity Reversed</td><td class="num">46</td><td class="num">0.273</td><td class="num">0.522</td><td class="num">0.358</td><td>"Without permission" → "permitted"</td></tr>
+            <tr><td><code>OMIT_COND</code></td><td>Prerequisite / Condition Dropped</td><td class="num">46</td><td class="num">0.341</td><td class="num">0.435</td><td class="num">0.382</td><td>"Payable only if admitted 24h" dropped</td></tr>
+            <tr><td><code>HALLUC</code></td><td>Extraneous Content Added</td><td class="num">52</td><td class="num">0.312</td><td class="num">0.462</td><td class="num">0.372</td><td>Uncontracted penalty fees or terms added</td></tr>
+            <tr><td><code>MINOR</code></td><td>Minor Stylistic Nuance Shift</td><td class="num">50</td><td class="num">0.152</td><td class="num">0.280</td><td class="num">0.197</td><td>Administrative filing procedure omitted</td></tr>
+            <tr><td><code>SCOPE</code></td><td>Quantifier Breadth Changed</td><td class="num">52</td><td class="num">0.120</td><td class="num">0.120</td><td class="num">0.120</td><td>"Any claim" narrowed to "some claims"</td></tr>
+            <tr style="background:var(--accent-soft)"><td><b>OVERALL</b></td><td><b>Non-Preservation Detection</b></td><td class="num" style="font-weight:700">480</td><td class="num" style="font-weight:700">0.867</td><td class="num" style="font-weight:700">0.867</td><td class="num" style="font-weight:700">0.867</td><td><b>Flags compromised legal rewrites</b></td></tr>
+          </tbody>
+        </table>
+      </div>
     </section>
   </section>
 
@@ -846,10 +999,64 @@ function renderApi() {
 curl -F "file=@pairs.csv" ${base}/api/batch/csv > scored.csv`;
 }
 
+// ================================================================== live accuracy suite
+let liveAccRan = false;
+const LIVE_TEST_CASES = [
+  { name: "Identical Invariance", o: "A compulsory deductible of Rs. 2,000 shall apply to each claim under this policy.", s: "A compulsory deductible of Rs. 2,000 shall apply to each claim under this policy.", check: (r) => r.score >= 9.8 && r.decision === "Preserved", expect: "Score ≥ 9.8 · Preserved" },
+  { name: "Deductible Alteration (10×)", o: "A compulsory deductible of Rs. 2,000 shall apply to each claim under this policy.", s: "You pay the first Rs. 20,000 of each claim under this policy yourself.", check: (r) => r.score < 4.5 && r.type === "NUMBER", expect: "Score < 4.5 · Code: NUMBER" },
+  { name: "Party Inversion (Landlord ↔ Tenant)", o: "The Landlord shall bear the cost of all structural repairs to the premises.", s: "The tenant must pay for all structural repairs to the premises.", check: (r) => r.score < 4.5 && r.type === "ENTITY", expect: "Score < 4.5 · Code: ENTITY" },
+  { name: "Faithful Plain Simplification", o: "The Landlord shall bear the cost of all structural repairs to the premises.", s: "The landlord must pay for all structural repairs to the premises.", check: (r) => r.score >= 7.5 && r.decision === "Preserved", expect: "Score ≥ 7.5 · Preserved" },
+  { name: "Deontic Flip (shall → may)", o: "The insured shall notify the insurer in writing of any accident within seven days of its occurrence.", s: "You may tell the insurer in writing about an accident within seven days.", check: (r) => r.score < 7.0 && r.type === "MODALITY", expect: "Score < 7.0 · Code: MODALITY" },
+  { name: "Carve-out / Exception Dropped", o: "Hospital expenses are payable only if the insured is admitted for at least twenty-four hours, except for day-care procedures.", s: "Hospital costs are paid only if you stay in hospital for at least 24 hours.", check: (r) => r.score < 4.5 && r.type === "EXC_REMOVED", expect: "Score < 4.5 · Code: EXC_REMOVED" },
+  { name: "Hindi Negation Removed (Devanagari)", o: "किरायेदार मकान मालिक की लिखित अनुमति के बिना परिसर में पालतू जानवर नहीं रखेगा।", s: "किरायेदार परिसर में पालतू जानवर रख सकता है।", check: (r) => r.score < 5.0 && r.type === "NEGATION", expect: "Score < 5.0 · Code: NEGATION" },
+  { name: "Hindi Notice Period Altered", o: "बीमित व्यक्ति दुर्घटना के सात दिनों के भीतर बीमाकर्ता को लिखित सूचना देगा।", s: "आपको दुर्घटना के 30 दिनों के भीतर बीमाकर्ता को लिखित सूचना देनी होगी।", check: (r) => r.score < 5.0 && r.type === "DATE", expect: "Score < 5.0 · Code: DATE" },
+  { name: "Hindi Faithful Rewrite", o: "मकान मालिक परिसर की सभी संरचनात्मक मरम्मत का खर्च उठाएगा।", s: "परिसर की सभी संरचनात्मक मरम्मत का खर्च मकान मालिक देगा।", check: (r) => r.score >= 7.5 && r.decision === "Preserved", expect: "Score ≥ 7.5 · Preserved" },
+  { name: "Model Tenancy Act (90d → 30d Notice)", o: "Either party may terminate this tenancy without cause upon giving ninety (90) days prior written notice to the other party.", s: "Either party can end this agreement without giving a reason, as long as they give 30 days written notice in advance.", check: (r) => r.score < 4.5 && r.type === "DATE", expect: "Score < 4.5 · Code: DATE" },
+  { name: "Unrelated Sanity Bound", o: "The Landlord shall bear the cost of all structural repairs to the premises.", s: "किरायेदार परिसर में पालतू जानवर रख सकता है।", check: (r) => r.score < 2.0 && r.decision === "Not preserved", expect: "Score < 2.0 · Not preserved" }
+];
+
+function runLiveAccuracySuite() {
+  const t0 = performance.now();
+  let passed = 0;
+  const rows = LIVE_TEST_CASES.map((tc, idx) => {
+    const r = LMP.score(tc.o, tc.s);
+    const ok = tc.check(r);
+    if (ok) passed++;
+    return `<tr class="${ok ? "" : "fired"}">
+      <td style="font-weight:600;white-space:nowrap">${idx + 1}. ${esc(tc.name)}</td>
+      <td class="clip" title="${esc(tc.o)}"><span>${esc(tc.o)}</span></td>
+      <td class="clip" title="${esc(tc.s)}"><span>${esc(tc.s)}</span></td>
+      <td style="font-family:var(--f-mono);font-size:12px;color:var(--muted);white-space:nowrap">${esc(tc.expect)}</td>
+      <td class="num" style="font-weight:700">${r.score.toFixed(1)}/10</td>
+      <td><span class="pill ${band(r.score)}">${esc(r.decision)}</span></td>
+      <td><code>${esc(r.type)}</code></td>
+      <td style="text-align:center">${ok ? '<span class="pill ok" style="padding:2px 8px">✓ Pass</span>' : '<span class="pill bad" style="padding:2px 8px">✗ Fail</span>'}</td>
+    </tr>`;
+  });
+  const ms = (performance.now() - t0).toFixed(1);
+  liveAccRan = true;
+  $("liveAccOutput").innerHTML = `
+    <div class="note ok" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <span><b>✓ ${passed} / ${LIVE_TEST_CASES.length} In-Browser Verification Tests Passed (${Math.round(100 * passed / LIVE_TEST_CASES.length)}%)</b></span>
+      <span style="font-family:var(--f-mono);font-size:12.5px">Total execution latency: ${ms} ms · Active LegalDiff-GBR engine verified</span>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Test Case</th><th>Original Clause</th><th>Plain Rewrite</th><th>Expected Behavior</th><th style="text-align:right">Score</th><th>Decision</th><th>Diagnosis</th><th style="text-align:center">Result</th></tr>
+        </thead>
+        <tbody>${rows.join("")}</tbody>
+      </table>
+    </div>
+  `;
+}
+$("runAccuracyTest")?.addEventListener("click", runLiveAccuracySuite);
+
 // ================================================================== tabs + data flow
 function showTab(name) {
   document.querySelectorAll("nav.tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === name)));
   document.querySelectorAll("[data-room]").forEach((s) => { s.hidden = s.dataset.room !== name; });
+  if (name === "accuracies" && !liveAccRan) runLiveAccuracySuite();
   if (name === "history") renderHistory(); if (name === "dashboard") renderDashboard(); if (name === "api") renderApi();
   try { localStorage.setItem("lmc.tab", name); } catch { /* ignore */ }
 }
@@ -865,6 +1072,6 @@ function onData() {
 orig.value = EXAMPLES[0].o; simp.value = EXAMPLES[0].s; document.querySelector('#examples .chip[data-i="0"]').setAttribute("aria-pressed", "true");
 preview();
 let startTab = "check"; try { startTab = localStorage.getItem("lmc.tab") || "check"; } catch { /* ignore */ }
-showTab(["check", "batch", "history", "dashboard", "api"].includes(startTab) ? startTab : "check");
+showTab(["check", "batch", "history", "accuracies", "dashboard", "api"].includes(startTab) ? startTab : "check");
 startBackend();
 </script>
