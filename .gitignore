@@ -10,3 +10,4 @@ web/tests.json
 results/logs/train_all_state.json
 results_checkpoint_backup/
 node_modules/
+.vercel
