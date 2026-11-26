@@ -13,6 +13,7 @@ RUN pip install -r api/requirements.txt
 COPY src/legal_features.py src/legal_features.py
 COPY data/enhi_lmp.jsonl data/enhi_lmp.jsonl
 COPY data/enhi_lmp_human.jsonl data/enhi_lmp_human.jsonl
+COPY data/enhi_lmp_extended_real.jsonl data/enhi_lmp_extended_real.jsonl
 COPY web/stats640.json web/stats640.json
 COPY api api
 # Train the model inside the image so the pickle always matches the installed scikit-learn version.

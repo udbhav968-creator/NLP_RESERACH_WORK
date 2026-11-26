@@ -23,7 +23,8 @@ STATIC = Path(__file__).resolve().parent / "static"
 app = FastAPI(title="EnHi-LMP Legal Meaning Checker API", version=VERSION,
               description="Scores whether a plain-language rewrite of an English or Hindi legal clause keeps its legal meaning "
                           "(1–10, JUDGEBERT scale), decides Preserved / Partially / Not preserved, and explains the legal change. "
-                          "Model: LegalDiff-GBR trained on 640 EnHi-LMP double-annotated gold human pairs (Krippendorff's alpha = 0.966).")
+                          "Model: LegalDiff-GBR trained on 683 real legal contract pairs including double-annotated gold human pairs (alpha=0.966), "
+                          "CUAD v1 commercial contracts, ToS;DR terms of service, and Indian Model Tenancy Act 2021.")
 app.add_middleware(CORSMiddleware, allow_origins=os.environ.get("LMP_CORS", "*").split(","), allow_methods=["*"], allow_headers=["*"])
 svc = LMPService()
 store = Store(os.environ.get("LMP_DB", Path(__file__).resolve().parent / "data" / "lmp.sqlite3"))

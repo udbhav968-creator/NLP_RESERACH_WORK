@@ -245,7 +245,7 @@ a { color: var(--accent) }
     <section class="panel">
       <h2>How the stack fits together</h2>
       <div class="tablewrap"><table><thead><tr><th>Layer</th><th>What it is</th><th>Where</th></tr></thead><tbody>
-        <tr><td><b>Model</b></td><td>LegalDiff (19 bilingual legal-difference features) + gradient-boosted trees + rule-based explainer, trained on 640 EnHi-LMP pairs</td><td><code>src/legal_features.py</code>, <code>api/lmp_service.py</code></td></tr>
+        <tr><td><b>Model</b></td><td>LegalDiff (19 bilingual legal-difference features) + gradient-boosted trees + rule-based explainer, trained on 683 real-world contract pairs (CUAD v1, ToS;DR, Indian Model Tenancy Act 2021, and gold human pairs)</td><td><code>src/legal_features.py</code>, <code>api/lmp_service.py</code></td></tr>
         <tr><td><b>Backend</b></td><td>FastAPI REST API with SQLite storage for checks and human feedback; OpenAPI docs at <code>/docs</code></td><td><code>api/main.py</code>, <code>api/storage.py</code></td></tr>
         <tr><td><b>Frontend</b></td><td>This app. It talks to the API when served by it, and otherwise runs the same model in the browser (JavaScript port, identical scores)</td><td><code>frontend/</code>, <code>web/lmp.js</code></td></tr>
         <tr><td><b>Ops</b></td><td>Docker image, Hugging Face Spaces and Render configs, GitHub Actions CI (API tests + JS-vs-Python parity test)</td><td><code>Dockerfile</code>, <code>render.yaml</code>, <code>.github/workflows/ci.yml</code></td></tr>
