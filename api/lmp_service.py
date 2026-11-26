@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT / "src"))
 import legal_features as LF  # noqa: E402
 
 MODEL_PATH = Path(os.environ.get("LMP_MODEL", ROOT / "api" / "model.joblib"))
-DATA_PATH = ROOT / "data" / "enhi_lmp.jsonl"
+DATA_PATH = ROOT / "data" / os.environ.get("LMP_DATA", "enhi_lmp_human.jsonl")
 TYPE_LABELS = {"NONE": "No legal change found", "NEGATION": "Negation reversed", "MODALITY": "Obligation / permission changed",
                "NUMBER": "Amount or number changed", "DATE": "Time limit changed", "OMIT_COND": "Condition dropped",
                "EXC_REMOVED": "Exception removed", "SCOPE": "Scope changed", "ENTITY": "Wrong party", "HALLUC": "Content added",
