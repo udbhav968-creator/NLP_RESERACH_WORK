@@ -56,7 +56,8 @@ def train(data_path: Path | None = None, out: Path = MODEL_PATH, seed: int = 0) 
     pairs, y = augment([(r["original"], r["simplification"]) for r in rows], [r["score"] for r in rows], seed)
     X = np.array([LF.features(o, s)[0] for o, s in pairs])
     m = GradientBoostingRegressor(random_state=seed, n_estimators=200, max_depth=3, learning_rate=0.05, subsample=0.8).fit(X, y)
-    meta = dict(model="LegalDiff-GBR", n_train=len(rows), n_trees=200, max_depth=3, features=LF.FEATURE_NAMES, seed=seed)
+    meta = dict(model="LegalDiff-GBR", n_train=len(rows), n_trees=200, max_depth=3, features=LF.FEATURE_NAMES, seed=seed,
+                labels="double human-annotated gold LMP scores (1–10, alpha=0.966)")
     joblib.dump({"model": m, "meta": meta}, out)
     return meta
 

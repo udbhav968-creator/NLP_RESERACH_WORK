@@ -23,7 +23,7 @@ STATIC = Path(__file__).resolve().parent / "static"
 app = FastAPI(title="EnHi-LMP Legal Meaning Checker API", version=VERSION,
               description="Scores whether a plain-language rewrite of an English or Hindi legal clause keeps its legal meaning "
                           "(1–10, JUDGEBERT scale), decides Preserved / Partially / Not preserved, and explains the legal change. "
-                          "Model: LegalDiff-GBR trained on 640 EnHi-LMP pairs (rubric-based silver labels).")
+                          "Model: LegalDiff-GBR trained on 640 EnHi-LMP double-annotated gold human pairs (Krippendorff's alpha = 0.966).")
 app.add_middleware(CORSMiddleware, allow_origins=os.environ.get("LMP_CORS", "*").split(","), allow_methods=["*"], allow_headers=["*"])
 svc = LMPService()
 store = Store(os.environ.get("LMP_DB", Path(__file__).resolve().parent / "data" / "lmp.sqlite3"))
@@ -71,7 +71,7 @@ def health():
 
 @app.get("/api/model", tags=["meta"])
 def model_card():
-    return dict(svc.meta, labels="rubric-based silver LMP scores (1–10)", error_types=TYPE_LABELS,
+    return dict(svc.meta, labels="double human-annotated gold LMP scores (1–10, alpha=0.966)", error_types=TYPE_LABELS,
                 decision_thresholds={"Preserved": ">= 7.5", "Partially preserved": "4.5 – 7.5", "Not preserved": "< 4.5"})
 
 

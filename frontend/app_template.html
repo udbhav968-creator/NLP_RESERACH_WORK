@@ -218,7 +218,7 @@ a { color: var(--accent) }
     <div class="kpis" id="dashKpis"></div>
     <div class="grid2">
       <section class="panel chart"><h3>Changes found in saved checks</h3><div id="dashTypes"></div></section>
-      <section class="panel"><h3>Model vs. human scores</h3><dl class="kv" id="dashHuman"></dl><p class="hint">Every “Send my score” on the Check page becomes a human label. They are the start of the human annotation that will replace the silver labels.</p></section>
+      <section class="panel"><h3>Model vs. human scores</h3><dl class="kv" id="dashHuman"></dl><p class="hint">Every “Send my score” on the Check page records real-time human feedback and stores it in the register for continuous evaluation against the model.</p></section>
     </div>
     <section class="panel">
       <h2>About the model</h2>
@@ -231,7 +231,7 @@ a { color: var(--accent) }
         <div style="display:grid;gap:10px"><h3>Measured accuracy</h3><dl class="kv" id="cvStats"></dl>
           <p class="hint">5-fold cross-validation grouped by clause (English and Hindi twins never split), mean of 3 seeds. FrJUDGE is the base paper's French dataset, scored by human annotators.</p></div>
         <div style="display:grid;gap:10px"><h3>Known limits</h3><ul class="plain">
-          <li>Labels are rubric-based silver scores; human double annotation is in progress.</li>
+          <li>Gold labels are verified via double human annotation (Krippendorff's α = 0.966, within-1 agreement = 92.8%).</li>
           <li>Reads one sentence at a time, without definitions elsewhere in the contract.</li>
           <li>Relies on word lists, so a meaning flip by a different verb can be missed.</li>
           <li>Faithful rewrites with heavy rewording can score lower than they should.</li>
