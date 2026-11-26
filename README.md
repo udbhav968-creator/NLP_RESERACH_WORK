@@ -29,6 +29,7 @@
 | ⚖️ **Double-Annotated Gold Dataset** | 640 human-annotated English-Hindi clauses | [data/enhi_lmp_human.jsonl](data/enhi_lmp_human.jsonl) |
 | 📚 **Extended Real Contract Dataset** | 683 real pairs (CUAD, ToS;DR, MTA 2021) | [data/enhi_lmp_extended_real.jsonl](data/enhi_lmp_extended_real.jsonl) |
 | 📁 **Team Word Documents Folder** | All editable Word (.docx) deliverables collected in one folder | [team_docx/](team_docx/) |
+| 📁 **Yashwanth Deliverables Folder** | Dedicated folder with all 4 Word (.docx) project deliverables | [yashwanth/](yashwanth/) |
 | 📘 **Complete Project Documentation (DOCX)** | Full, exhaustive project report with all chapters, formulas, and tables | [deliverables/EnHi_LMP_Complete_Project_Documentation.docx](deliverables/EnHi_LMP_Complete_Project_Documentation.docx) |
 | 📘 **University Mini Project Report (PDF)** | Formatted academic mini-project report for CSET 346 | [deliverables/NLP_Mini_Project_Report.pdf](deliverables/NLP_Mini_Project_Report.pdf) |
 | 📑 **University Mini Project Report (DOCX)** | Editable template report updated with 683 real pairs & alpha=0.966 | [deliverables/NLP_Mini_Project_Report.docx](deliverables/NLP_Mini_Project_Report.docx) |
@@ -385,6 +386,16 @@ flowchart TD
 │   ├── LMP_Milestone1.pptx          # Ready-to-present Milestone 1 PowerPoint slides
 │   ├── Slide_Explanation_Guide.pdf  # Comprehensive defense guide & Q&A preparation
 │   └── Research_Gaps_and_Enhancements.pdf # Detailed gap-by-gap analysis document
+├── team_docx/                       # Official Word (.docx) deliverables for the team
+│   ├── EnHi_LMP_Complete_Project_Documentation.docx
+│   ├── NLP_Mini_Project_Report.docx
+│   ├── LMP_IEEE_Paper.docx
+│   └── Slide_Explanation_Guide.docx
+├── yashwanth/                       # Dedicated folder with all Word (.docx) project deliverables
+│   ├── EnHi_LMP_Complete_Project_Documentation.docx
+│   ├── NLP_Mini_Project_Report.docx
+│   ├── LMP_IEEE_Paper.docx
+│   └── Slide_Explanation_Guide.docx
 ├── results/
 │   ├── exp1_summary.json            # 5-fold cross-validation metrics on 640 human pairs
 │   ├── exp2_crosslingual.json       # EN <-> HI cross-lingual transfer metrics
