@@ -1,0 +1,9 @@
+{
+ "krippendorff_alpha_interval": 0.9661014910935773,
+ "n_pairs_both": 640,
+ "exact_agreement": 0.5390625,
+ "within_1": 0.928125,
+ "n_to_adjudicate": 2,
+ "n_pairs_human": 640,
+ "pearson_silver_vs_human": 0.9904444826663427
+}

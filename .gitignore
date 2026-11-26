@@ -8,3 +8,4 @@ api/data/
 api/model.joblib
 web/tests.json
 results/logs/train_all_state.json
+results_checkpoint_backup/

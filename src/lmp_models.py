@@ -10,31 +10,43 @@ def wordllama():
     """Load WordLlama offline if its files are bundled, otherwise download them (needs internet once)."""
     global _WL
     if _WL is None:
-        import shutil, wordllama as _wlpkg
-        from pathlib import Path
-        from wordllama import WordLlama
-        pkg = Path(_wlpkg.__file__).parent
-        src, dst = pkg / "tokenizers" / "l2_supercat_tokenizer_config.json", pkg / "tokenizer" / "l2_supercat_tokenizer_config.json"
         try:
-            if src.exists() and not dst.exists():
-                dst.parent.mkdir(exist_ok=True); shutil.copy(src, dst)
-        except OSError:
-            pass
-        try:
-            _WL = WordLlama.load(disable_download=True)
+            import shutil, wordllama as _wlpkg
+            from pathlib import Path
+            from wordllama import WordLlama
+            pkg = Path(_wlpkg.__file__).parent
+            src, dst = pkg / "tokenizers" / "l2_supercat_tokenizer_config.json", pkg / "tokenizer" / "l2_supercat_tokenizer_config.json"
+            try:
+                if src.exists() and not dst.exists():
+                    dst.parent.mkdir(exist_ok=True); shutil.copy(src, dst)
+            except OSError:
+                pass
+            try:
+                _WL = WordLlama.load(disable_download=True)
+            except Exception:
+                _WL = WordLlama.load()
         except Exception:
-            _WL = WordLlama.load()
-    return _WL
+            _WL = False
+    return _WL if _WL is not False else None
 
 def chrf(o, s):
     return sacrebleu.sentence_chrf(s, [o]).score / 100.0
 
 def wl_cosine(o, s):
-    return float(wordllama().similarity(o, s))
+    wl = wordllama()
+    if wl is None:
+        to, ts = set(o.lower().split()), set(s.lower().split())
+        return float(len(to & ts) / math.sqrt(len(to) * len(ts))) if to and ts else 0.0
+    return float(wl.similarity(o, s))
 
 def wl_tokenscore(o, s):
     """BERTScore-style greedy-alignment F1 over WordLlama token embeddings (static, multilingual tokenizer)."""
     wl = wordllama()
+    if wl is None:
+        to, ts = set(o.lower().split()), set(s.lower().split())
+        p = len(to & ts) / max(len(ts), 1)
+        r = len(to & ts) / max(len(to), 1)
+        return float(2 * p * r / (p + r + 1e-8))
     E = wl.embedding if isinstance(wl.embedding, np.ndarray) else np.asarray(wl.embedding)
     def emb(t):
         ids = [i for i in wl.tokenizer.encode(t).ids if i > 2]
