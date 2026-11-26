@@ -154,7 +154,7 @@ a { color: var(--accent) }
           <span class="hint" id="saveHint">The verdict updates as you type; saving adds it to History.</span>
         </div>
         <div class="field">
-          <span class="hint">Examples (written for this demo, not taken from the training data):</span>
+          <span class="hint">Interactive examples (insurance, tenancy, CUAD commercial contracts, &amp; Model Tenancy Act):</span>
           <div class="chips" id="examples"></div>
         </div>
       </form>
@@ -477,6 +477,8 @@ const EXAMPLES = [
   { tag: "EN", name: "Faithful", o: "The Landlord shall bear the cost of all structural repairs to the premises.", s: "The landlord must pay for all structural repairs to the premises." },
   { tag: "EN", name: "Must → may", o: "The insured shall notify the insurer in writing of any accident within seven days of its occurrence.", s: "You may tell the insurer in writing about an accident within seven days." },
   { tag: "EN", name: "Exception dropped", o: "Hospital expenses are payable only if the insured is admitted for at least twenty-four hours, except for day-care procedures.", s: "Hospital costs are paid only if you stay in hospital for at least 24 hours." },
+  { tag: "CUAD", name: "Indemnity", o: "The Contractor shall indemnify, defend, and hold harmless the Company, its affiliates, and their respective directors, officers, and employees from and against any and all claims, liabilities, losses, damages, costs, and expenses arising out of any breach of warranty or willful misconduct.", s: "The contractor must protect and pay the company and its staff for any losses or claims caused by broken warranties or intentional wrongdoing." },
+  { tag: "MTA", name: "Notice 90d → 30d", o: "Either party may terminate this tenancy without cause upon giving ninety (90) days prior written notice to the other party.", s: "Either party can end this agreement without giving a reason, as long as they give 30 days written notice in advance." },
   { tag: "HI", name: "Negation removed", o: "किरायेदार मकान मालिक की लिखित अनुमति के बिना परिसर में पालतू जानवर नहीं रखेगा।", s: "किरायेदार परिसर में पालतू जानवर रख सकता है।" },
   { tag: "HI", name: "Deadline changed", o: "बीमित व्यक्ति दुर्घटना के सात दिनों के भीतर बीमाकर्ता को लिखित सूचना देगा।", s: "आपको दुर्घटना के 30 दिनों के भीतर बीमाकर्ता को लिखित सूचना देनी होगी।" },
   { tag: "HI", name: "Faithful", o: "मकान मालिक परिसर की सभी संरचनात्मक मरम्मत का खर्च उठाएगा।", s: "परिसर की सभी संरचनात्मक मरम्मत का खर्च मकान मालिक देगा।" },

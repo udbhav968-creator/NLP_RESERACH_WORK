@@ -1,14 +1,17 @@
 # Explainable Multilingual Legal Meaning Preservation (EnHi-LMP + ML-JudgeBERT)
 
 [![CI](https://github.com/udbhav968-creator/NLP_RESERACH_WORK/actions/workflows/ci.yml/badge.svg)](https://github.com/udbhav968-creator/NLP_RESERACH_WORK/actions/workflows/ci.yml)
-[![Live Web App](https://img.shields.io/badge/Render-Live%20Demo-24785A)](https://legal-meaning-checker.onrender.com)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20App-000000?logo=vercel)](https://nlp-research-work.vercel.app)
+[![API Backend (Render)](https://img.shields.io/badge/Render-API%20Backend-24785A?logo=render)](https://legal-meaning-checker.onrender.com)
 [![Python 3.12 | 3.14](https://img.shields.io/badge/Python-3.12%20%7C%203.14-blue)](https://www.python.org/)
 [![Human Agreement](https://img.shields.io/badge/Krippendorff's%20%CE%B1-0.966-success)](annotation/agreement.json)
-[![Dataset](https://img.shields.io/badge/Gold%20Dataset-640%20Pairs-blueviolet)](data/enhi_lmp_human.jsonl)
+[![Dataset](https://img.shields.io/badge/Real%20Contracts-683%20Pairs-blueviolet)](data/enhi_lmp_extended_real.jsonl)
+[![Documentation](https://img.shields.io/badge/Dataset%20Report-Deep%20Training-orange)](DATASET_AND_TRAINING_REPORT.md)
 
 > **CSET 346 – Natural Language Processing (Course Project)**  
 > **Instructor:** Dr. Surabhi Solanki · School of Computer Science Engineering & Technology, Bennett University  
-> **Core Foundation:** Extension of *JUDGEBERT: Assessing Legal Meaning Preservation Between Sentences* (Beauchemin et al., EMNLP 2025).
+> **Core Foundation:** Extension of *JUDGEBERT: Assessing Legal Meaning Preservation Between Sentences* (Beauchemin et al., EMNLP 2025).  
+> **Detailed Faculty Documentation:** See [DATASET_AND_TRAINING_REPORT.md](DATASET_AND_TRAINING_REPORT.md) for full dataset provenance, statutory acts, and training procedures.
 
 ---
 
@@ -58,6 +61,13 @@ Independent double-blind human annotation was conducted following the formal 1�
 - **Within-1 point agreement:** **$92.8\%$** ($594 / 640$ pairs differed by $\le 1.0$ point).
 - **Adjudication:** Only 2 pairs differed by $\ge 3$ points ($0.31\%$), which were adjudicated to create the final gold truth.
 - **Silver-vs-Human Correlation:** Pearson $r = 0.990$.
+
+### 3.3 Extended Real-World Contracts (CUAD + ToS;DR + MTA 2021)
+To ensure zero synthetic domain bias, we augmented the 640 gold human pairs with real commercial and statutory legal contracts:
+- **CUAD v1 (NeurIPS 2021):** SEC EDGAR commercial contracts covering indemnification, non-compete covenants, audit rights, and liability caps.
+- **ToS;DR Legal Review Database:** Real terms of service and SaaS contracts.
+- **Model Tenancy Act 2021 & Indian Contract Act 1872:** Real statutory provisions in both English and official Hindi translations.
+- **Total Combined Dataset:** **683 authentic legal pairs** (`data/enhi_lmp_extended_real.jsonl`). Full details in [DATASET_AND_TRAINING_REPORT.md](DATASET_AND_TRAINING_REPORT.md).
 
 ---
 
