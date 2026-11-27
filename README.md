@@ -24,6 +24,8 @@
 | 📖 **Interactive API Docs (Swagger)** | OpenAPI documentation & interactive runner | [https://legal-meaning-checker.onrender.com/docs](https://legal-meaning-checker.onrender.com/docs) |
 | 📑 **API Documentation (ReDoc)** | Clean technical REST specifications | [https://legal-meaning-checker.onrender.com/redoc](https://legal-meaning-checker.onrender.com/redoc) |
 | 🩺 **Backend Health & Model Card** | Real-time model status and metadata (`n_train: 683`) | [https://legal-meaning-checker.onrender.com/api/health](https://legal-meaning-checker.onrender.com/api/health) |
+| 🏆 **Final Evaluation Report (DOCX)** | Official comprehensive final evaluation report with all benchmarks & audit | [team_docx/Final_Evaluation_Report.docx](team_docx/Final_Evaluation_Report.docx) |
+| 🏆 **Final Evaluation Report (Markdown)** | Direct GitHub view of the complete final evaluation report | [FINAL_EVALUATION_REPORT.md](FINAL_EVALUATION_REPORT.md) |
 | 📄 **Faculty Dataset & Training Report** | Corpus provenance, CUAD/ToS;DR/MTA details, and deep training | [DATASET_AND_TRAINING_REPORT.md](DATASET_AND_TRAINING_REPORT.md) |
 | 📊 **Annotation Agreement Report** | Krippendorff's $\alpha = 0.966$, confusion matrices | [annotation/agreement.json](annotation/agreement.json) |
 | ⚖️ **Double-Annotated Gold Dataset** | 640 human-annotated English-Hindi clauses | [data/enhi_lmp_human.jsonl](data/enhi_lmp_human.jsonl) |
