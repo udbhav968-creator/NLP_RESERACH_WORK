@@ -65,6 +65,7 @@ class FeedbackRequest(BaseModel):
 
 # ------------------------------------------------------------------ routes
 @app.get("/api/health", tags=["meta"])
+@app.get("/api/v1/health", include_in_schema=False)
 def health():
     return dict(status="ok", version=VERSION, model=svc.meta["model"], n_train=svc.meta["n_train"],
                 uptime_s=round(time.time() - STARTED, 1), checks_stored=store.counts()["total"])
